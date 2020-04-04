@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import netP5.NetAddress;
 import netP5.NetAddressList;
@@ -82,7 +82,7 @@ import netP5.UdpServer;
 public class OscP5 implements Observer {
 
 	static public boolean DEBUG = false;
-	final static Logger LOGGER = Logger.getLogger( OscP5.class.getName( ) );
+        private Logger logger;
 	protected Map< String , List< OscPlug >> _myOscPlugMap = new HashMap< String , List< OscPlug >>( );
 	public final static boolean ON = OscProperties.ON;
 	public final static boolean OFF = OscProperties.OFF;
@@ -103,7 +103,7 @@ public class OscP5 implements Observer {
 	private boolean isEventMethod;
 	private boolean isPacketMethod;
 	private boolean isBroadcast = false;
-	public static final String VERSION = "2.0.4";
+	public static final String VERSION = "2.1.4";
 	static private int welcome = 0;
 	private Transmitter transmit;
 	private Object parent;
@@ -176,10 +176,10 @@ public class OscP5 implements Observer {
 			}
 			break;
 		case ( OscProperties.MULTICAST ):
-			LOGGER.info( "Multicast is not yet implemented with this version. " );
+			logging("info",  "Multicast is not yet implemented with this version. " );
 			break;
 		default:
-			LOGGER.info( "Unknown protocol." );
+			logging("info",  "Unknown protocol." );
 			break;
 		}
 
@@ -207,7 +207,7 @@ public class OscP5 implements Observer {
 
 	public void stop( ) {
 		/* TODO notify clients and servers. */
-		LOGGER.finest( "stopping oscP5." );
+		logging("warn",  "stopping oscP5." );
 	}
 
 	public void addListener( OscEventListener theListener ) {
@@ -272,17 +272,19 @@ public class OscP5 implements Observer {
 		return method;
 	}
 
-	public static void flush( final NetAddress theNetAddress , final byte[] theBytes ) {
+	public static void flush( final NetAddress theNetAddress , final byte[] theBytes ) throws SocketException, IOException {
 		DatagramSocket mySocket;
 		try {
 			mySocket = new DatagramSocket( );
 			DatagramPacket myPacket = new DatagramPacket( theBytes , theBytes.length , theNetAddress.inetaddress( ) , theNetAddress.port( ) );
 			mySocket.send( myPacket );
-		} catch ( SocketException e ) {
-			LOGGER.warning( "OscP5.openSocket, can't create socket " + e.getMessage( ) );
-		} catch ( IOException e ) {
-			LOGGER.warning( "OscP5.openSocket, can't create multicastSocket " + e.getMessage( ) );
 		}
+                catch (SocketException e) {
+                  throw new SocketException(e.toString());
+		}
+                catch (IOException e) {
+                  throw new IOException(e.toString());
+                }
 	}
 
 	/**
@@ -339,7 +341,7 @@ public class OscP5 implements Observer {
 		}
 	}
 
-	private void callMethod( final OscMessage theOscMessage ) {
+	private void callMethod( final OscMessage theOscMessage ) throws ClassCastException {
 
 		/* forward the received message to all OscEventListeners */
 
@@ -375,9 +377,10 @@ public class OscP5 implements Observer {
 		if ( isEventMethod ) {
 			try {
 				invoke( parent , _myEventMethod , new Object[] { theOscMessage } );
-			} catch ( ClassCastException e ) {
-				LOGGER.warning( "OscHandler.callMethod, ClassCastException." + e );
 			}
+                        catch (ClassCastException e) {
+                          throw new ClassCastException(e.toString());
+                        }
 		}
 
 	}
@@ -392,7 +395,7 @@ public class OscP5 implements Observer {
 			e.printStackTrace( );
 		} catch ( InvocationTargetException e ) {
 			e.printStackTrace( );
-			LOGGER.finest( "An error occured while forwarding an OscMessage\n " + "to a method in your program. please check your code for any \n" + "possible errors that might occur in the method where incoming\n "
+			logging("warn",  "An error occured while forwarding an OscMessage\n " + "to a method in your program. please check your code for any \n" + "possible errors that might occur in the method where incoming\n "
 			    + "OscMessages are parsed e.g. check for casting errors, possible\n " + "nullpointers, array overflows ... .\n" + "method in charge : " + theMethod.getName( ) + "  " + e );
 		}
 
@@ -407,7 +410,12 @@ public class OscP5 implements Observer {
 	private void process( OscPacket thePacket ) {
 		/* TODO add raw packet listener here */
 		if ( thePacket instanceof OscMessage ) {
-			callMethod( ( OscMessage ) thePacket );
+			try {
+                          callMethod( ( OscMessage ) thePacket );
+                        }
+                        catch (ClassCastException e) {
+                          logging("error", e.toString());
+                        }
 		} else if ( thePacket instanceof OscBundle ) {
 			if ( isPacketMethod ) {
 				invoke( parent , _myPacketMethod , new Object[] { thePacket } );
@@ -589,15 +597,15 @@ public class OscP5 implements Observer {
 	 * a static method to send an OscMessage straight out of the box without having to instantiate
 	 * oscP5.
 	 */
-	public static void flush( final NetAddress theNetAddress , final OscMessage theOscMessage ) {
+	public static void flush( final NetAddress theNetAddress , final OscMessage theOscMessage ) throws SocketException, IOException {
 		flush( theNetAddress , theOscMessage.getBytes( ) );
 	}
 
-	public static void flush( final NetAddress theNetAddress , final OscPacket theOscPacket ) {
+	public static void flush( final NetAddress theNetAddress , final OscPacket theOscPacket ) throws SocketException, IOException {
 		flush( theNetAddress , theOscPacket.getBytes( ) );
 	}
 
-	public static void flush( final NetAddress theNetAddress , final String theAddrPattern , final Object ... theArguments ) {
+	public static void flush( final NetAddress theNetAddress , final String theAddrPattern , final Object ... theArguments ) throws SocketException, IOException {
 		flush( theNetAddress , ( new OscMessage( theAddrPattern , theArguments ) ).getBytes( ) );
 	}
 
@@ -626,41 +634,43 @@ public class OscP5 implements Observer {
 
 	/* DEPRECATED methods and constructors. */
 
-	@Deprecated public void process( final DatagramPacket thePacket , final int thePort ) {
+	@Deprecated public void process( final DatagramPacket thePacket , final int thePort ) throws SocketException, IOException {
 		/* TODO , process( Map ) should be used. */
 	}
 
-	@Deprecated public static void flush( final OscMessage theOscMessage , final NetAddress theNetAddress ) {
+	@Deprecated public static void flush( final OscMessage theOscMessage , final NetAddress theNetAddress ) throws SocketException, IOException {
 		flush( theOscMessage.getBytes( ) , theNetAddress );
 	}
 
-	@Deprecated public static void flush( final OscPacket theOscPacket , final NetAddress theNetAddress ) {
+	@Deprecated public static void flush( final OscPacket theOscPacket , final NetAddress theNetAddress ) throws SocketException, IOException {
 		flush( theOscPacket.getBytes( ) , theNetAddress );
 	}
 
-	@Deprecated public static void flush( final String theAddrPattern , final Object[] theArguments , final NetAddress theNetAddress ) {
+	@Deprecated public static void flush( final String theAddrPattern , final Object[] theArguments , final NetAddress theNetAddress ) throws SocketException, IOException {
 		flush( ( new OscMessage( theAddrPattern , theArguments ) ).getBytes( ) , theNetAddress );
 	}
 
-	@Deprecated public static void flush( final byte[] theBytes , final NetAddress theNetAddress ) {
+	@Deprecated public static void flush( final byte[] theBytes , final NetAddress theNetAddress ) throws SocketException, IOException {
 		DatagramSocket mySocket;
 		try {
 			mySocket = new DatagramSocket( );
 
 			DatagramPacket myPacket = new DatagramPacket( theBytes , theBytes.length , theNetAddress.inetaddress( ) , theNetAddress.port( ) );
 			mySocket.send( myPacket );
-		} catch ( SocketException e ) {
-			LOGGER.warning( "OscP5.openSocket, can't create socket " + e.getMessage( ) );
-		} catch ( IOException e ) {
-			LOGGER.warning( "OscP5.openSocket, can't create multicastSocket " + e.getMessage( ) );
 		}
+                catch (SocketException e) {
+                  throw new SocketException(e.toString());
+                }
+                catch (IOException e) {
+                  throw new IOException(e.toString());
+                }
 	}
 
-	@Deprecated public static void flush( final byte[] theBytes , final String theAddress , final int thePort ) {
+	@Deprecated public static void flush( final byte[] theBytes , final String theAddress , final int thePort ) throws SocketException, IOException {
 		flush( theBytes , new NetAddress( theAddress , thePort ) );
 	}
 
-	@Deprecated public static void flush( final OscMessage theOscMessage , final String theAddress , final int thePort ) {
+	@Deprecated public static void flush( final OscMessage theOscMessage , final String theAddress , final int thePort ) throws SocketException, IOException {
 		flush( theOscMessage.getBytes( ) , new NetAddress( theAddress , thePort ) );
 	}
 
@@ -760,4 +770,36 @@ public class OscP5 implements Observer {
 	 *
 	 * l0.removeHandler(l0.getHandlers()[0]); // remove handler */
 
+        // TODO
+        public void setLogger(Logger _logger) {
+          logger = _logger;
+        }
+
+        // TODO
+        private void logging(String _type, String _text) {
+          try {
+            if (logger == null) {
+              System.out.println( "["+_type+"]" + _text );
+            }
+            else {
+              if (_type.equals("info")) {
+                logger.info(_text);
+              }
+              else if (_type.equals("debug")) {
+                logger.debug(_text);
+              }
+              else if (_type.equals("warn")) {
+                logger.warn(_text);
+              }
+              else if (_type.equals("error")) {
+                logger.error(_text);
+              }
+            }
+          }
+          catch (Exception e) {
+            System.out.println(e.toString());
+          }
+        }
 }
+
+

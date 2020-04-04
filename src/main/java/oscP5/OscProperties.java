@@ -103,7 +103,7 @@ public class OscProperties {
 		if ( !isLocked ) {
 			_myDatagramSize = theSize;
 		} else {
-			OscP5.LOGGER.warning( "datagram size can only be set before initializing oscP5\ncurrent datagram size is " + _myDatagramSize + ", use OscProperties.setDatagramSize( int )." );
+			System.out.println( "datagram size can only be set before initializing oscP5\ncurrent datagram size is " + _myDatagramSize + ", use OscProperties.setDatagramSize( int )." );
 		}
 		return this;
 	}
@@ -125,12 +125,12 @@ public class OscProperties {
 	public OscProperties setNetworkProtocol( final int theProtocol ) {
 		if ( !isLocked ) {
 			if ( theProtocol > 2 ) {
-				OscP5.LOGGER.warning( "OscProperties.setNetworkProtocol, not in the range of supported Network protocols. the network protocol defaults to UDP" );
+				System.out.println( "OscProperties.setNetworkProtocol, not in the range of supported Network protocols. the network protocol defaults to UDP" );
 			} else {
 				_myNetworkProtocol = theProtocol;
 			}
 		} else {
-			OscP5.LOGGER.warning( "OscProperties.setNetworkProtocol, network protocol can only be set before initializing oscP5." );
+			System.out.println( "OscProperties.setNetworkProtocol, network protocol can only be set before initializing oscP5." );
 		}
 		return this;
 	}
