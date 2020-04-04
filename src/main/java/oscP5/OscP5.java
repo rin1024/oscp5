@@ -1,23 +1,23 @@
 /**
  * An OSC (Open Sound Control) library for processing.
- * 
+ *
  * ##copyright##
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General
  * Public License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place, Suite 330,
  * Boston, MA 02111-1307 USA
- * 
+ *
  * @author ##author##
  * @modified ##date##
  * @version ##version##
@@ -68,16 +68,16 @@ import netP5.UdpServer;
  * for modern networking technology and has been used in many application areas.
  * for further specifications and application implementations please visit the
  * official osc site.
- * 
+ *
  */
 
 /**
  * TODO add better error message handling for oscEvents, see this post
  * http://forum.processing.org/topic/oscp5-major-problems-with-error-handling# 25080000000811163
- * 
+ *
  * TODO add option to define host IP, see this thread:
  * http://forum.processing.org/two/discussion/2550/oscp5-android-cannot-send-only-receive
- * 
+ *
  */
 public class OscP5 implements Observer {
 
@@ -224,7 +224,7 @@ public class OscP5 implements Observer {
 
 	/**
 	 * Check if we are dealing with a PApplet parent.
-	 * If this is the case, register "dispose". 
+	 * If this is the case, register "dispose".
 	 * Do so quietly, no error messages will be displayed.
 	 */
 	private void registerDispose( Object theObject ) {
@@ -290,7 +290,7 @@ public class OscP5 implements Observer {
 	 * method can be used to by-pass parsing raw osc messages - this job is done for you with the
 	 * plug mechanism. you can also use the following array-types int[], float[], String[]. (but
 	 * only as on single parameter e.g. somemethod(int[] theArray) {} ).
-	 * 
+	 *
 	 */
 	public void plug( final Object theObject , final String theMethodName , final String theAddrPattern , final String theTypeTag ) {
 
@@ -755,9 +755,9 @@ public class OscP5 implements Observer {
 	 * http://www.google.com/search?hl=en&q=mutex+java&btnG=Search */
 
 	/* how to disable the logger
-	 * 
+	 *
 	 * Logger l0 = Logger.getLogger(""); // get the global logger
-	 * 
+	 *
 	 * l0.removeHandler(l0.getHandlers()[0]); // remove handler */
 
 }
