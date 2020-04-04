@@ -1,4 +1,5 @@
 target/
+library/classes/
 .classpath
 .project
 .settings/
@@ -11,3 +12,4 @@ NOTES
 bin/
 reference/
 materials/
+library/tmp/jar/MANIFEST.MF
