@@ -13,3 +13,4 @@ bin/
 reference/
 materials/
 library/tmp/jar/MANIFEST.MF
+.gradle/
