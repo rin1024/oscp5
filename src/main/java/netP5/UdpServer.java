@@ -1,23 +1,23 @@
 /**
  * A network library for processing which supports UDP, TCP and Multicast.
- * 
+ *
  * ##copyright##
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General
  * Public License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place, Suite 330,
  * Boston, MA 02111-1307 USA
- * 
+ *
  * @author ##author##
  * @modified ##date##
  * @version ##version##
@@ -91,7 +91,7 @@ public final class UdpServer extends Observable implements Transmitter {
 		try {
 
 			ByteBuffer buffer = ByteBuffer.allocate( theContent.length );
-			buffer.clear( );
+			((Buffer)buffer).clear( );
 			buffer.put( theContent );
 			buffer.flip( );
 			for ( SocketAddress addr : theAddress ) {
@@ -132,7 +132,7 @@ public final class UdpServer extends Observable implements Transmitter {
 				channel.socket( ).bind( isa );
 				channel.register( selector , SelectionKey.OP_READ , ByteBuffer.allocate( size ) );
 				LOGGER.info( "starting server, listening on port " + port + " (" + isa.getAddress( ).getHostAddress( ) + ":" + isa.getPort( ) + " " + isa.getAddress( ).getLocalHost( )+ ":" + isa.getPort( ) + ")" );
-				
+
 				/* Let's listen for incoming messages */
 				while ( !Thread.currentThread( ).isInterrupted( ) ) {
 					/* Wait for task or until timeout expires */
@@ -152,7 +152,7 @@ public final class UdpServer extends Observable implements Transmitter {
 
 							DatagramChannel channel0 = ( DatagramChannel ) key.channel( );
 							ByteBuffer buffer = ( ( ByteBuffer ) key.attachment( ) );
-							buffer.clear( ); /* Prepare buffer for receiving */
+							((Buffer)buffer).clear( ); /* Prepare buffer for receiving */
 							SocketAddress client = channel0.receive( buffer );
 							InetSocketAddress addr = ( InetSocketAddress ) client;
 
