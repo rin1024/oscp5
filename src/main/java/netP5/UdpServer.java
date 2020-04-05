@@ -158,7 +158,7 @@ public final class UdpServer extends Observable implements Transmitter {
 							InetSocketAddress addr = ( InetSocketAddress ) client;
 
 							if ( client != null ) { /* handle received message */
-								buffer.flip( );
+								((Buffer)buffer).flip( );
 								final Map< String , Object > m = new HashMap< String , Object >( );
 								final byte[] data = new byte[ buffer.remaining( ) ];
 								buffer.get( data );
