@@ -30,6 +30,7 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.Buffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -93,7 +94,7 @@ public final class UdpServer extends Observable implements Transmitter {
 			ByteBuffer buffer = ByteBuffer.allocate( theContent.length );
 			((Buffer)buffer).clear( );
 			buffer.put( theContent );
-			buffer.flip( );
+			((Buffer)buffer).flip( );
 			for ( SocketAddress addr : theAddress ) {
 				server.channel.send( buffer , addr );
 			}
