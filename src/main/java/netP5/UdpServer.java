@@ -45,6 +45,7 @@ import org.apache.log4j.Logger;
 public final class UdpServer extends Observable implements Transmitter {
 
         static public Logger logger;
+        static private String broadcastAddress;
 
 	private final InternalServer server;
 
@@ -96,11 +97,20 @@ public final class UdpServer extends Observable implements Transmitter {
 			buffer.put( theContent );
 			((Buffer)buffer).flip( );
 			for ( SocketAddress addr : theAddress ) {
+                          String remoreAddress = ((InetSocketAddress)addr).getAddress().toString().split("/")[1];
+                          try {
+                                if (remoreAddress.equals(broadcastAddress)) {
+                                  server.channel.socket().setBroadcast(true);
+                                }
 				server.channel.send( buffer , addr );
+                          }
+                          catch (Exception e2) {
+                            logging( "error", "Could not send datagram " + e2.toString() + ": socket = " + remoreAddress);
+                          }
 			}
 			return true;
 		} catch ( Exception e ) {
-			System.err.println( "Could not send datagram " + e );
+			logging( "error", "Could not send datagram " + e );
 		}
 		return false;
 	}
@@ -182,7 +192,6 @@ public final class UdpServer extends Observable implements Transmitter {
 				}
 			} catch ( IOException e ) {
 				logging("info",  "Couldn't start UDP server on port " + port + " " + e +" Is there another application using the same port?");
-				// e.printStackTrace( );
 			}
 			logging("info",  "thread interrupted and closed." );
 		}
@@ -190,6 +199,10 @@ public final class UdpServer extends Observable implements Transmitter {
 	}
 
 	/* TODO consider to use java.util.concurrent.Executor here instead of Thread. */
+
+        public void setBroadcastAddress(String _broadcastAddress) {
+          broadcastAddress = _broadcastAddress;
+        }
 
         // TODO
         public void setLogger(Logger _logger) {
@@ -209,7 +222,7 @@ public final class UdpServer extends Observable implements Transmitter {
             }
             else {
               if (_type.equals("info")) {
-                logging("info", _text);
+                logger.info(_text);
               }
               else if (_type.equals("debug")) {
                 logger.debug(_text);
@@ -223,7 +236,7 @@ public final class UdpServer extends Observable implements Transmitter {
             }
           }
           catch (Exception e) {
-            System.out.println(e.toString());
+            System.err.println( "logging error" + e.toString());
           }
         }
 }

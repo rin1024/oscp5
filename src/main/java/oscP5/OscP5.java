@@ -162,6 +162,8 @@ public class OscP5 implements Observer {
 				transmit = udpclient;
 			} else {
 				UdpServer udpserver = NetP5.createUdpServer( _myOscProperties.host( ) , _myOscProperties.listeningPort( ) , _myOscProperties.datagramSize( ) );
+				udpserver.setBroadcastAddress( broadcastAddress );
+				udpserver.setLogger( logger );
 				udpserver.addObserver( this );
 				transmit = udpserver;
 			}
@@ -757,17 +759,17 @@ public class OscP5 implements Observer {
 
 	/* Notes */
 
-        public void setBroadcastAddress(String _broadcastAddress) {
+        public static void setBroadcastAddress(String _broadcastAddress) {
           broadcastAddress = _broadcastAddress;
         }
 
         // TODO
-        public void setLogger(Logger _logger) {
+        public static void setLogger(Logger _logger) {
           logger = _logger;
         }
 
         // TODO
-        private void logging(String _type, String _text) {
+        private static void logging(String _type, String _text) {
           try {
             if (logger == null) {
               if (_type.equals("warn") || _type.equals("error")) {
