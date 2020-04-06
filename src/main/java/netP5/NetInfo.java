@@ -1,23 +1,23 @@
 /**
  * A network library for processing which supports UDP, TCP and Multicast.
- * 
+ *
  * ##copyright##
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General
  * Public License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place, Suite 330,
  * Boston, MA 02111-1307 USA
- * 
+ *
  * @author ##author##
  * @modified ##date##
  * @version ##version##
@@ -122,7 +122,7 @@ public class NetInfo {
 	}
 
 	/**
-	 * 
+	 *
 	 * returns a map of available network interfaces. this map's keys use the network interface's
 	 * name as identifier. Each value is a map with the following keys: name (eg en0, eth0, lo0),
 	 * display-name (en0, Wireless Network Connection, Loopback), mac (the device's MAC address as
@@ -192,11 +192,11 @@ public class NetInfo {
 	public static void main( String[] args ) {
 		NetInfo.wan( );
 	}
-	
-	
+
+
 	// TODO bonjour/zeroconf [3]
-	
-	
+
+
 	// References
 	// [1] source from http://android-er.blogspot.sg/2014/02/get-my-ip-address.html?m=1
 	// [2] oscP5, android, multicast http://forum.processing.org/one/topic/shy-oscp5-kissed-android-at-last-not-really-perfect.html
@@ -204,7 +204,7 @@ public class NetInfo {
 	// [4] network services with android http://developer.android.com/training/connect-devices-wirelessly/nsd.html
 	// [5] multicast on android http://stackoverflow.com/questions/3623143/multicast-on-android-2-2
 	// [6] oscP5  for android http://forum.processing.org/one/topic/oscp5-for-processing-android.html
-	
-	
-	
+
+
+
 }
