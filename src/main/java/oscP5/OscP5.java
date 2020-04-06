@@ -108,6 +108,8 @@ public class OscP5 implements Observer {
 	private Transmitter transmit;
 	private Object parent;
 
+        static private String broadcastAddress;
+
 	/**
 	 * default constructor, starts an UDP server with maximum packet size of 1536 bytes.
 	 */
@@ -182,6 +184,8 @@ public class OscP5 implements Observer {
 			logging("info",  "Unknown protocol." );
 			break;
 		}
+
+                broadcastAddress = "";
 
 	}
 
@@ -276,8 +280,15 @@ public class OscP5 implements Observer {
 		DatagramSocket mySocket;
 		try {
 			mySocket = new DatagramSocket( );
+                        if (theNetAddress.address().equals(broadcastAddress)) {
+                          mySocket.setBroadcast(true);
+                        }
+
 			DatagramPacket myPacket = new DatagramPacket( theBytes , theBytes.length , theNetAddress.inetaddress( ) , theNetAddress.port( ) );
 			mySocket.send( myPacket );
+                        mySocket.disconnect();
+			mySocket.close();
+                        mySocket = null;
 		}
                 catch (SocketException e) {
                   throw new SocketException(e.toString());
@@ -657,6 +668,9 @@ public class OscP5 implements Observer {
 
 			DatagramPacket myPacket = new DatagramPacket( theBytes , theBytes.length , theNetAddress.inetaddress( ) , theNetAddress.port( ) );
 			mySocket.send( myPacket );
+                        mySocket.disconnect();
+			mySocket.close();
+                        mySocket = null;
 		}
                 catch (SocketException e) {
                   throw new SocketException(e.toString());
@@ -769,6 +783,10 @@ public class OscP5 implements Observer {
 	 * Logger l0 = Logger.getLogger(""); // get the global logger
 	 *
 	 * l0.removeHandler(l0.getHandlers()[0]); // remove handler */
+
+        public void setBroadcastAddress(String _broadcastAddress) {
+          broadcastAddress = _broadcastAddress;
+        }
 
         // TODO
         public void setLogger(Logger _logger) {
