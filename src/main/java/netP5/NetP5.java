@@ -25,11 +25,11 @@
 
 package netP5;
 
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public class NetP5 {
 
-	final static Logger LOGGER = Logger.getLogger( NetP5.class.getName( ) );
+        static public Logger logger;
 
 	static public UdpClient createUdpClient( String theHost , final int thePort ) {
 		return new UdpClient( theHost , thePort );

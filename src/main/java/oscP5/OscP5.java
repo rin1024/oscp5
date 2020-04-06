@@ -82,7 +82,7 @@ import netP5.UdpServer;
 public class OscP5 implements Observer {
 
 	static public boolean DEBUG = false;
-        private Logger logger;
+        static public Logger logger;
 	protected Map< String , List< OscPlug >> _myOscPlugMap = new HashMap< String , List< OscPlug >>( );
 	public final static boolean ON = OscProperties.ON;
 	public final static boolean OFF = OscProperties.OFF;
@@ -153,7 +153,7 @@ public class OscP5 implements Observer {
 		isEventMethod = _myEventMethod != null;
 		isPacketMethod = _myPacketMethod != null;
 
-		println( _myEventMethod , isEventMethod , "\n" , _myPacketMethod , isPacketMethod );
+		logging( "info", _myEventMethod + " = " + (isEventMethod ? "true" : "false") + "\n" + _myPacketMethod + " = " + (isPacketMethod ? "true" : "false") );
 
 		switch ( _myOscProperties.networkProtocol( ) ) {
 		case ( OscProperties.UDP ):
@@ -196,7 +196,7 @@ public class OscP5 implements Observer {
 
 	private void welcome( ) {
 		if ( welcome++ < 1 ) {
-			System.out.println( "OscP5 " + VERSION + " " + "infos, comments, questions at http://www.sojamo.de/libraries/oscP5\n\n" );
+			logging( "info", "OscP5 " + VERSION + " " + "infos, comments, questions at http://www.sojamo.de/libraries/oscP5\n\n" );
 		}
 	}
 
@@ -246,7 +246,7 @@ public class OscP5 implements Observer {
 					parent = theObject;
 				}
 			} catch ( Exception e ) {
-				debug( "OscP5.registerDispose()" , "registerDispose failed (1)" , e.getCause( ) );
+				logging("debug",  "OscP5.registerDispose()" + "registerDispose failed (1)" + e.getCause( ) );
 			}
 
 			try {
@@ -254,15 +254,15 @@ public class OscP5 implements Observer {
 				try {
 					method.invoke( parent , new Object[] { "dispose" , this } );
 				} catch ( Exception e ) {
-					debug( "OscP5.registerDispose()" , "registerDispose failed (2)" , e.getCause( ) );
+					logging("debug",  "OscP5.registerDispose()" + "registerDispose failed (2)" + e.getCause( ) );
 				}
 
 			} catch ( NoSuchMethodException e ) {
-				debug( "OscP5.registerDispose()" , "registerDispose failed (3)" , e.getCause( ) );
+				logging("debug",  "OscP5.registerDispose()" + "registerDispose failed (3)" + e.getCause( ) );
 			}
 
 		} catch ( NullPointerException e ) {
-			debug( "OscP5.registerDispose()" , "registerDispose failed (4)" , e.getCause( ) );
+			logging("debug",  "OscP5.registerDispose()" + "registerDispose failed (4)" + e.getCause( ) );
 		}
 	}
 
@@ -516,7 +516,7 @@ public class OscP5 implements Observer {
 				try {
 					DatagramChannel d = ( ( DatagramChannel ) theRemoteSocket );
 
-					System.out.println( String.format( "channel :  %s %s" , d.isConnected( ) , d.socket( ).getInetAddress( ) ) );
+					logging( "info", String.format( "channel :  " + d.isConnected( ) + " " + d.socket( ).getInetAddress( ) ) );
 					( ( DatagramChannel ) theRemoteSocket ).write( buffer );
 					return true;
 				} catch ( IOException e ) {
@@ -618,23 +618,6 @@ public class OscP5 implements Observer {
 
 	public static void flush( final NetAddress theNetAddress , final String theAddrPattern , final Object ... theArguments ) throws SocketException, IOException {
 		flush( theNetAddress , ( new OscMessage( theAddrPattern , theArguments ) ).getBytes( ) );
-	}
-
-	static public void print( final Object ... strs ) {
-		for ( Object str : strs ) {
-			System.out.print( str + " " );
-		}
-	}
-
-	static public void println( final Object ... strs ) {
-		print( strs );
-		System.out.println( );
-	}
-
-	static public void debug( final Object ... strs ) {
-		if ( DEBUG ) {
-			println( strs );
-		}
 	}
 
 	static public void sleep( final long theMillis ) {
@@ -774,16 +757,6 @@ public class OscP5 implements Observer {
 
 	/* Notes */
 
-	/* TODO implement polling option to avoid threading and synchronization issues. check email from
-	 * tom lieber. look into mutex objects.
-	 * http://www.google.com/search?hl=en&q=mutex+java&btnG=Search */
-
-	/* how to disable the logger
-	 *
-	 * Logger l0 = Logger.getLogger(""); // get the global logger
-	 *
-	 * l0.removeHandler(l0.getHandlers()[0]); // remove handler */
-
         public void setBroadcastAddress(String _broadcastAddress) {
           broadcastAddress = _broadcastAddress;
         }
@@ -797,7 +770,12 @@ public class OscP5 implements Observer {
         private void logging(String _type, String _text) {
           try {
             if (logger == null) {
-              System.out.println( "["+_type+"]" + _text );
+              if (_type.equals("warn") || _type.equals("error")) {
+                System.err.println( "["+_type+"]" + _text );
+              }
+              else {
+                System.out.println( "["+_type+"]" + _text );
+              }
             }
             else {
               if (_type.equals("info")) {

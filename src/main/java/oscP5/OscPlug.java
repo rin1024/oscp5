@@ -26,11 +26,12 @@
 package oscP5;
 
 import java.lang.reflect.Method;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public class OscPlug {
 
-	private final static Logger LOGGER = Logger.getLogger( OscPlug.class.getName( ) );
+        static public Logger logger;
+
 	private boolean _isValid = true;
 	private String _myTypetag = "";
 	private String _myAddrPattern = "";
@@ -71,7 +72,7 @@ public class OscPlug {
 			if ( myParams != null ) {
 				makeMethod( theObject.getClass( ) , myParams );
 			} else {
-				LOGGER.warning( "OscPlug, no arguments found for method " + _myMethodName );
+				logging("warn",  "OscPlug, no arguments found for method " + _myMethodName );
 			}
 		}
 	}
@@ -109,12 +110,12 @@ public class OscPlug {
 			method = theObjectsClass.getDeclaredMethod( _myMethodName , theClass );
 			_myPattern = _myAddrPattern + _myTypetag;
 			method.setAccessible( true );
-			LOGGER.finest( "plugging " + theObjectsClass + " | " + "addrPattern:" + _myAddrPattern + " typetag:" + _myTypetag + " method:" + _myMethodName );
+			logging("debug",  "plugging " + theObjectsClass + " | " + "addrPattern:" + _myAddrPattern + " typetag:" + _myTypetag + " method:" + _myMethodName );
 		} catch ( Exception e ) {
 			final Class< ? > theObjecsSuperClass = theObjectsClass.getSuperclass( );
 			if ( theObjecsSuperClass.equals( Object.class ) ) {
 				if ( theObjectsClass.getName( ).equals( "java.awt.Component" ) == false ) {
-					LOGGER.warning( "OscPlug, method " + theObjectsClass.getName( ) + " does not exist in your code." );
+					logging("warn",  "OscPlug, method " + theObjectsClass.getName( ) + " does not exist in your code." );
 				}
 			} else {
 				makeMethod( theObjecsSuperClass , theClass );
@@ -239,4 +240,39 @@ public class OscPlug {
 		return tClass;
 	}
 
+        // TODO
+        public void setLogger(Logger _logger) {
+          logger = _logger;
+        }
+
+        // TODO
+        private void logging(String _type, String _text) {
+          try {
+            if (logger == null) {
+              if (_type.equals("warn") || _type.equals("error")) {
+                System.err.println( "["+_type+"]" + _text );
+              }
+              else {
+                System.out.println( "["+_type+"]" + _text );
+              }
+            }
+            else {
+              if (_type.equals("info")) {
+                logger.info(_text);
+              }
+              else if (_type.equals("debug")) {
+                logger.debug(_text);
+              }
+              else if (_type.equals("warn")) {
+                logger.warn(_text);
+              }
+              else if (_type.equals("error")) {
+                logger.error(_text);
+              }
+            }
+          }
+          catch (Exception e) {
+            System.out.println(e.toString());
+          }
+        }
 }

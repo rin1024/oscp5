@@ -40,11 +40,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public final class UdpServer extends Observable implements Transmitter {
 
-	final static Logger LOGGER = Logger.getLogger( UdpServer.class.getName( ) );
+        static public Logger logger;
 
 	private final InternalServer server;
 
@@ -132,7 +132,7 @@ public final class UdpServer extends Observable implements Transmitter {
 				InetSocketAddress isa = ( host == null ) ? new InetSocketAddress( port ) : new InetSocketAddress( host , port );
 				channel.socket( ).bind( isa );
 				channel.register( selector , SelectionKey.OP_READ , ByteBuffer.allocate( size ) );
-				LOGGER.info( "starting server, listening on port " + port + " (" + isa.getAddress( ).getHostAddress( ) + ":" + isa.getPort( ) + " " + isa.getAddress( ).getLocalHost( )+ ":" + isa.getPort( ) + ")" );
+				logging("info",  "starting server, listening on port " + port + " (" + isa.getAddress( ).getHostAddress( ) + ":" + isa.getPort( ) + " " + isa.getAddress( ).getLocalHost( )+ ":" + isa.getPort( ) + ")" );
 
 				/* Let's listen for incoming messages */
 				while ( !Thread.currentThread( ).isInterrupted( ) ) {
@@ -181,14 +181,49 @@ public final class UdpServer extends Observable implements Transmitter {
 					}
 				}
 			} catch ( IOException e ) {
-				LOGGER.info( "Couldn't start UDP server on port " + port + " " + e +" Is there another application using the same port?");
+				logging("info",  "Couldn't start UDP server on port " + port + " " + e +" Is there another application using the same port?");
 				// e.printStackTrace( );
 			}
-			LOGGER.info( "thread interrupted and closed." );
+			logging("info",  "thread interrupted and closed." );
 		}
 
 	}
 
 	/* TODO consider to use java.util.concurrent.Executor here instead of Thread. */
 
+        // TODO
+        public void setLogger(Logger _logger) {
+          logger = _logger;
+        }
+
+        // TODO
+        private void logging(String _type, String _text) {
+          try {
+            if (logger == null) {
+              if (_type.equals("warn") || _type.equals("error")) {
+                System.err.println( "["+_type+"]" + _text );
+              }
+              else {
+                System.out.println( "["+_type+"]" + _text );
+              }
+            }
+            else {
+              if (_type.equals("info")) {
+                logging("info", _text);
+              }
+              else if (_type.equals("debug")) {
+                logger.debug(_text);
+              }
+              else if (_type.equals("warn")) {
+                logger.warn(_text);
+              }
+              else if (_type.equals("error")) {
+                logger.error(_text);
+              }
+            }
+          }
+          catch (Exception e) {
+            System.out.println(e.toString());
+          }
+        }
 }

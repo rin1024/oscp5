@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public class Multicast extends Observable implements Transmitter {
 
@@ -67,7 +67,7 @@ public class Multicast extends Observable implements Transmitter {
 
 	private Thread thread;
 
-	final static Logger LOGGER = Logger.getLogger( Multicast.class.getName( ) );
+        static public Logger logger;
 
 	private MulticastSocket socket;
 
@@ -188,17 +188,17 @@ public class Multicast extends Observable implements Transmitter {
 	}
 
 	public boolean send( byte[] theContent , Collection< InetSocketAddress > theAddress ) {
-		LOGGER.info( "not implemented, use send(byte[])." );
+		logging("info",  "not implemented, use send(byte[])." );
 		return false;
 	}
 
 	public boolean send( byte[] theContent , String theHost , int thePort ) {
-		LOGGER.info( "not implemented, use send(byte[])." );
+		logging("info",  "not implemented, use send(byte[])." );
 		return false;
 	}
 
 	public boolean send( byte[] theContent , SocketAddress ... theAddress ) {
-		LOGGER.info( "not implemented, use send(byte[])." );
+		logging("info",  "not implemented, use send(byte[])." );
 		return false;
 	}
 
@@ -213,4 +213,39 @@ public class Multicast extends Observable implements Transmitter {
 		return false;
 	}
 
+        // TODO
+        public void setLogger(Logger _logger) {
+          logger = _logger;
+        }
+
+        // TODO
+        private void logging(String _type, String _text) {
+          try {
+            if (logger == null) {
+              if (_type.equals("warn") || _type.equals("error")) {
+                System.err.println( "["+_type+"]" + _text );
+              }
+              else {
+                System.out.println( "["+_type+"]" + _text );
+              }
+            }
+            else {
+              if (_type.equals("info")) {
+                logging("info", _text);
+              }
+              else if (_type.equals("debug")) {
+                logger.debug(_text);
+              }
+              else if (_type.equals("warn")) {
+                logger.warn(_text);
+              }
+              else if (_type.equals("error")) {
+                logger.error(_text);
+              }
+            }
+          }
+          catch (Exception e) {
+            System.out.println(e.toString());
+          }
+        }
 }
