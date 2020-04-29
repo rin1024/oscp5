@@ -16,3 +16,4 @@ library/tmp/jar/MANIFEST.MF
 .gradle/
 *.swp
 *.un~
+.DS_Store
