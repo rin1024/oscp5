@@ -146,9 +146,9 @@ public class Bytes {
 		return copy( abyte0 , i , abyte0.length - i );
 	}
 
-	public static byte[] copy( byte abyte0[] , int i , int j ) {
-		byte abyte1[] = new byte[ j ];
-		System.arraycopy( abyte0 , i , abyte1 , 0 , j );
+	public static byte[] copy( byte abyte0[] , int i , int j ) throws java.lang.ArrayIndexOutOfBoundsException {
+    byte abyte1[] = new byte[ j ];
+    System.arraycopy( abyte0 , i , abyte1 , 0 , j);
 		return abyte1;
 	}
 
