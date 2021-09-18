@@ -775,7 +775,8 @@ public class OscP5 implements Observer {
           try {
             StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
             StackTraceElement element = stacktrace[2];
-            String callerClassName = element.getClassName();
+            String[] callerClassPath = element.getClassName().split("[.]");
+            String callerClassName = callerClassPath[callerClassPath.length - 1];
             String callerMethodName = element.getMethodName();
             String callerFileName = element.getFileName();
             //println(className + ", " + methodName + ", " + fileName);
