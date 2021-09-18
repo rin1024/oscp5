@@ -33,6 +33,10 @@ sourceSets {
 
 dependencies {
     provided group: 'org.processing', name: 'core', version: '3.3.7'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile fileTree(dir: 'lib', include: '**/*.jar')
+    // working with gradle 5.x
+    //testCompile group: 'junit', name: 'junit', version: '4.12'
+    //compile fileTree(dir: 'lib', include: '**/*.jar')
+    // working with gradle 7.2
+    testImplementation 'junit:junit:4.12'
+    implementation fileTree(dir: 'lib', include: ['*.jar'])
 }
