@@ -211,6 +211,21 @@ public final class UdpServer extends Observable implements Transmitter {
 
         // TODO
         private void logging(String _type, String _text) {
+          // 呼び出し元の情報を取得
+          try {
+            StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+            StackTraceElement element = stacktrace[2];
+            String callerClassName = element.getClassName();
+            String callerMethodName = element.getMethodName();
+            String callerFileName = element.getFileName();
+            //println(className + ", " + methodName + ", " + fileName);
+
+            _text = "[" + callerClassName + "." + callerMethodName + "] " + _text;
+          }
+          catch (Exception e) {
+            System.out.println(e.toString());
+          }
+          
           try {
             if (logger == null) {
               if (_type.equals("warn") || _type.equals("error")) {

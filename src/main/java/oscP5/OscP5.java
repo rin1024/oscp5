@@ -82,7 +82,8 @@ import netP5.UdpServer;
 public class OscP5 implements Observer {
 
 	static public boolean DEBUG = false;
-        static public Logger logger;
+  static public Logger logger;
+
 	protected Map< String , List< OscPlug >> _myOscPlugMap = new HashMap< String , List< OscPlug >>( );
 	public final static boolean ON = OscProperties.ON;
 	public final static boolean OFF = OscProperties.OFF;
@@ -153,7 +154,7 @@ public class OscP5 implements Observer {
 		isEventMethod = _myEventMethod != null;
 		isPacketMethod = _myPacketMethod != null;
 
-		logging( "info", _myEventMethod + " = " + (isEventMethod ? "true" : "false") + "\n" + _myPacketMethod + " = " + (isPacketMethod ? "true" : "false") );
+		//logging( "info", _myEventMethod + " = " + (isEventMethod ? "true" : "false") + "\n" + _myPacketMethod + " = " + (isPacketMethod ? "true" : "false") );
 
 		switch ( _myOscProperties.networkProtocol( ) ) {
 		case ( OscProperties.UDP ):
@@ -770,6 +771,21 @@ public class OscP5 implements Observer {
 
         // TODO
         private static void logging(String _type, String _text) {
+          // 呼び出し元の情報を取得
+          try {
+            StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+            StackTraceElement element = stacktrace[2];
+            String callerClassName = element.getClassName();
+            String callerMethodName = element.getMethodName();
+            String callerFileName = element.getFileName();
+            //println(className + ", " + methodName + ", " + fileName);
+
+            _text = "[" + callerClassName + "." + callerMethodName + "] " + _text;
+          }
+          catch (Exception e) {
+            System.out.println(e.toString());
+          }
+          
           try {
             if (logger == null) {
               if (_type.equals("warn") || _type.equals("error")) {
