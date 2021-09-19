@@ -44,8 +44,8 @@ import org.apache.log4j.Logger;
 
 public final class UdpServer extends Observable implements Transmitter {
 
-        static public Logger logger;
-        static private String broadcastAddress;
+  static public final Logger logger = Logger.getLogger(UdpServer.class.getName());;
+  static private String broadcastAddress;
 
 	private final InternalServer server;
 
@@ -54,7 +54,6 @@ public final class UdpServer extends Observable implements Transmitter {
 	}
 
 	public UdpServer( final String theHost , final int thePort , final int theDatagramSize ) {
-
 		/* This is a very basic UDP server listening for incoming message and forwarding the message to all registered
 		 * observers. This server can be used for simple networking operations with a small amount of clients. For
 		 * larger scale network operations make use of more sophisticated services such as for example netty.io, apache
@@ -105,12 +104,12 @@ public final class UdpServer extends Observable implements Transmitter {
 				server.channel.send( buffer , addr );
                           }
                           catch (Exception e2) {
-                            logging( "error", "Could not send datagram " + e2.toString() + ": socket = " + remoreAddress);
+                            logger.error("Could not send datagram " + e2.toString() + ": socket = " + remoreAddress);
                           }
 			}
 			return true;
 		} catch ( Exception e ) {
-			logging( "error", "Could not send datagram " + e );
+			logger.error("Could not send datagram " + e );
 		}
 		return false;
 	}
@@ -142,7 +141,7 @@ public final class UdpServer extends Observable implements Transmitter {
 				InetSocketAddress isa = ( host == null ) ? new InetSocketAddress( port ) : new InetSocketAddress( host , port );
 				channel.socket( ).bind( isa );
 				channel.register( selector , SelectionKey.OP_READ , ByteBuffer.allocate( size ) );
-				logging("info",  "starting server, listening on port " + port + " (" + isa.getAddress( ).getHostAddress( ) + ":" + isa.getPort( ) + " " + isa.getAddress( ).getLocalHost( )+ ":" + isa.getPort( ) + ")" );
+				logger.info(  "starting server, listening on port " + port + " (" + isa.getAddress( ).getHostAddress( ) + ":" + isa.getPort( ) + " " + isa.getAddress( ).getLocalHost( )+ ":" + isa.getPort( ) + ")" );
 
 				/* Let's listen for incoming messages */
 				while ( !Thread.currentThread( ).isInterrupted( ) ) {
@@ -191,68 +190,19 @@ public final class UdpServer extends Observable implements Transmitter {
 					}
 				}
 			} catch ( IOException e ) {
-				logging("info",  "Couldn't start UDP server on port " + port + " " + e +" Is there another application using the same port?");
+				logger.info(  "Couldn't start UDP server on port " + port + " " + e +" Is there another application using the same port?");
 			}
-			logging("info",  "thread interrupted and closed." );
+			logger.info(  "thread interrupted and closed." );
 		}
 
 	}
 
 	/* TODO consider to use java.util.concurrent.Executor here instead of Thread. */
 
-        public void setBroadcastAddress(String _broadcastAddress) {
-          broadcastAddress = _broadcastAddress;
-        }
-
-        // TODO
-        public void setLogger(Logger _logger) {
-          logger = _logger;
-        }
-
-        // TODO
-        private void logging(String _type, String _text) {
-          // 呼び出し元の情報を取得
-          try {
-            StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
-            StackTraceElement element = stacktrace[2];
-            String[] callerClassPath = element.getClassName().split("[.]");
-            String callerClassName = callerClassPath[callerClassPath.length - 1];
-            String callerMethodName = element.getMethodName();
-            String callerFileName = element.getFileName();
-            //println(className + ", " + methodName + ", " + fileName);
-
-            _text = "[" + callerClassName + "." + callerMethodName + "] " + _text;
-          }
-          catch (Exception e) {
-            System.out.println(e.toString());
-          }
-          
-          try {
-            if (logger == null) {
-              if (_type.equals("warn") || _type.equals("error")) {
-                System.err.println( "["+_type+"]" + _text );
-              }
-              else {
-                System.out.println( "["+_type+"]" + _text );
-              }
-            }
-            else {
-              if (_type.equals("info")) {
-                logger.info(_text);
-              }
-              else if (_type.equals("debug")) {
-                logger.debug(_text);
-              }
-              else if (_type.equals("warn")) {
-                logger.warn(_text);
-              }
-              else if (_type.equals("error")) {
-                logger.error(_text);
-              }
-            }
-          }
-          catch (Exception e) {
-            System.err.println( "logging error" + e.toString());
-          }
-        }
+  /**
+   *
+   **/
+  public void setBroadcastAddress(String _broadcastAddress) {
+    broadcastAddress = _broadcastAddress;
+  }
 }

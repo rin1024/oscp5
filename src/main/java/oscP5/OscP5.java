@@ -82,7 +82,7 @@ import netP5.UdpServer;
 public class OscP5 implements Observer {
 
 	static public boolean DEBUG = false;
-  static public Logger logger;
+  static public final Logger logger = Logger.getLogger(OscP5.class.getName());
 
 	protected Map< String , List< OscPlug >> _myOscPlugMap = new HashMap< String , List< OscPlug >>( );
 	public final static boolean ON = OscProperties.ON;
@@ -142,7 +142,6 @@ public class OscP5 implements Observer {
 	}
 
 	private void init( Object theParent , OscProperties theProperties ) {
-
 		welcome( );
 
 		parent = ( theParent == null ) ? new Object( ) : theParent;
@@ -154,7 +153,7 @@ public class OscP5 implements Observer {
 		isEventMethod = _myEventMethod != null;
 		isPacketMethod = _myPacketMethod != null;
 
-		//logging( "info", _myEventMethod + " = " + (isEventMethod ? "true" : "false") + "\n" + _myPacketMethod + " = " + (isPacketMethod ? "true" : "false") );
+		//logger.info( _myEventMethod + " = " + (isEventMethod ? "true" : "false") + "\n" + _myPacketMethod + " = " + (isPacketMethod ? "true" : "false") );
 
 		switch ( _myOscProperties.networkProtocol( ) ) {
 		case ( OscProperties.UDP ):
@@ -164,7 +163,6 @@ public class OscP5 implements Observer {
 			} else {
 				UdpServer udpserver = NetP5.createUdpServer( _myOscProperties.host( ) , _myOscProperties.listeningPort( ) , _myOscProperties.datagramSize( ) );
 				udpserver.setBroadcastAddress( broadcastAddress );
-				udpserver.setLogger( logger );
 				udpserver.addObserver( this );
 				transmit = udpserver;
 			}
@@ -181,10 +179,10 @@ public class OscP5 implements Observer {
 			}
 			break;
 		case ( OscProperties.MULTICAST ):
-			logging("info",  "Multicast is not yet implemented with this version. " );
+			logger.info("Multicast is not yet implemented with this version. ");
 			break;
 		default:
-			logging("info",  "Unknown protocol." );
+			logger.info("Unknown protocol.");
 			break;
 		}
 
@@ -199,7 +197,7 @@ public class OscP5 implements Observer {
 
 	private void welcome( ) {
 		if ( welcome++ < 1 ) {
-			logging( "info", "OscP5 " + VERSION + " " + "infos, comments, questions at http://www.sojamo.de/libraries/oscP5\n\n" );
+			logger.info("OscP5 " + VERSION + " " + "infos, comments, questions at http://www.sojamo.de/libraries/oscP5");
 		}
 	}
 
@@ -214,7 +212,7 @@ public class OscP5 implements Observer {
 
 	public void stop( ) {
 		/* TODO notify clients and servers. */
-		logging("warn",  "stopping oscP5." );
+		logger.warn("stopping oscP5.");
 	}
 
 	public void addListener( OscEventListener theListener ) {
@@ -249,7 +247,7 @@ public class OscP5 implements Observer {
 					parent = theObject;
 				}
 			} catch ( Exception e ) {
-				logging("debug",  "OscP5.registerDispose()" + "registerDispose failed (1)" + e.getCause( ) );
+				logger.debug( "OscP5.registerDispose()" + "registerDispose failed (1)" + e.getCause( ) );
 			}
 
 			try {
@@ -257,15 +255,15 @@ public class OscP5 implements Observer {
 				try {
 					method.invoke( parent , new Object[] { "dispose" , this } );
 				} catch ( Exception e ) {
-					logging("debug",  "OscP5.registerDispose()" + "registerDispose failed (2)" + e.getCause( ) );
+					logger.debug( "OscP5.registerDispose()" + "registerDispose failed (2)" + e.getCause( ) );
 				}
 
 			} catch ( NoSuchMethodException e ) {
-				logging("debug",  "OscP5.registerDispose()" + "registerDispose failed (3)" + e.getCause( ) );
+				logger.debug( "OscP5.registerDispose()" + "registerDispose failed (3)" + e.getCause( ) );
 			}
 
 		} catch ( NullPointerException e ) {
-			logging("debug",  "OscP5.registerDispose()" + "registerDispose failed (4)" + e.getCause( ) );
+			logger.debug( "OscP5.registerDispose()" + "registerDispose failed (4)" + e.getCause( ) );
 		}
 	}
 
@@ -404,12 +402,12 @@ public class OscP5 implements Observer {
 		try {
 			theMethod.invoke( theObject , theArgs );
 		} catch ( IllegalArgumentException e ) {
-			e.printStackTrace( );
+			logger.error(e.toString());
 		} catch ( IllegalAccessException e ) {
-			e.printStackTrace( );
+			logger.error(e.toString());
 		} catch ( InvocationTargetException e ) {
-			e.printStackTrace( );
-			logging("warn",  "An error occured while forwarding an OscMessage\n " + "to a method in your program. please check your code for any \n" + "possible errors that might occur in the method where incoming\n "
+			logger.error(e.toString());
+			logger.warn("An error occured while forwarding an OscMessage\n " + "to a method in your program. please check your code for any \n" + "possible errors that might occur in the method where incoming\n "
 			    + "OscMessages are parsed e.g. check for casting errors, possible\n " + "nullpointers, array overflows ... .\n" + "method in charge : " + theMethod.getName( ) + "  " + e );
 		}
 
@@ -428,7 +426,7 @@ public class OscP5 implements Observer {
                           callMethod( ( OscMessage ) thePacket );
                         }
                         catch (ClassCastException e) {
-                          logging("error", e.toString());
+                          logger.error( e.toString());
                         }
 		} else if ( thePacket instanceof OscBundle ) {
 			if ( isPacketMethod ) {
@@ -513,21 +511,21 @@ public class OscP5 implements Observer {
 					( ( SocketChannel ) theRemoteSocket ).write( buffer );
 					return true;
 				} catch ( IOException e ) {
-					e.printStackTrace( );
+					logger.error(e.toString());
 				}
 			} else if ( theRemoteSocket instanceof DatagramChannel ) {
 				try {
 					DatagramChannel d = ( ( DatagramChannel ) theRemoteSocket );
 
-					logging( "info", String.format( "channel :  " + d.isConnected( ) + " " + d.socket( ).getInetAddress( ) ) );
+					logger.info( String.format( "channel :  " + d.isConnected( ) + " " + d.socket( ).getInetAddress( ) ) );
 					( ( DatagramChannel ) theRemoteSocket ).write( buffer );
 					return true;
 				} catch ( IOException e ) {
-					e.printStackTrace( );
+					logger.error(e.toString());
 				} catch ( NotYetConnectedException e ) {
 					/* received a datagram packet, sender ip and port have been identified but we
 					 * are not able to connect to remote address due to no open socket availability. */
-					// e.printStackTrace( );
+					// logger.error(e.toString());
 				}
 			}
 		}
@@ -555,7 +553,7 @@ public class OscP5 implements Observer {
 				bos.close( );
 			} catch ( IOException e ) {
 				// TODO Auto-generated catch block
-				e.printStackTrace( );
+				logger.error(e.toString());
 			}
 		}
 		return bytes;
@@ -570,17 +568,17 @@ public class OscP5 implements Observer {
 			o = in.readObject( );
 		} catch ( IOException e ) {
 			// TODO Auto-generated catch block
-			e.printStackTrace( );
+			logger.error(e.toString());
 		} catch ( ClassNotFoundException e ) {
 			// TODO Auto-generated catch block
-			e.printStackTrace( );
+			logger.error(e.toString());
 		} finally {
 			try {
 				bis.close( );
 				in.close( );
 			} catch ( IOException e ) {
 				// TODO Auto-generated catch block
-				e.printStackTrace( );
+				logger.error(e.toString());
 			}
 		}
 		return o;
@@ -760,61 +758,12 @@ public class OscP5 implements Observer {
 
 	/* Notes */
 
-        public static void setBroadcastAddress(String _broadcastAddress) {
-          broadcastAddress = _broadcastAddress;
-        }
-
-        // TODO
-        public static void setLogger(Logger _logger) {
-          logger = _logger;
-        }
-
-        // TODO
-        private static void logging(String _type, String _text) {
-          // 呼び出し元の情報を取得
-          try {
-            StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
-            StackTraceElement element = stacktrace[2];
-            String[] callerClassPath = element.getClassName().split("[.]");
-            String callerClassName = callerClassPath[callerClassPath.length - 1];
-            String callerMethodName = element.getMethodName();
-            String callerFileName = element.getFileName();
-            //println(className + ", " + methodName + ", " + fileName);
-
-            _text = "[" + callerClassName + "." + callerMethodName + "] " + _text;
-          }
-          catch (Exception e) {
-            System.out.println(e.toString());
-          }
-          
-          try {
-            if (logger == null) {
-              if (_type.equals("warn") || _type.equals("error")) {
-                System.err.println( "["+_type+"]" + _text );
-              }
-              else {
-                System.out.println( "["+_type+"]" + _text );
-              }
-            }
-            else {
-              if (_type.equals("info")) {
-                logger.info(_text);
-              }
-              else if (_type.equals("debug")) {
-                logger.debug(_text);
-              }
-              else if (_type.equals("warn")) {
-                logger.warn(_text);
-              }
-              else if (_type.equals("error")) {
-                logger.error(_text);
-              }
-            }
-          }
-          catch (Exception e) {
-            System.out.println(e.toString());
-          }
-        }
+  /**
+   *
+   **/
+  public static void setBroadcastAddress(String _broadcastAddress) {
+    broadcastAddress = _broadcastAddress;
+  }
 }
 
 
