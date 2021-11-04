@@ -44,7 +44,7 @@ import org.apache.log4j.Logger;
 
 public final class UdpServer extends Observable implements Transmitter {
 
-  static public final Logger logger = Logger.getLogger(UdpServer.class.getName());;
+  static public final Logger L = Logger.getLogger(UdpServer.class.getName());
   static private String broadcastAddress;
 
 	private final InternalServer server;
@@ -104,18 +104,17 @@ public final class UdpServer extends Observable implements Transmitter {
 				server.channel.send( buffer , addr );
                           }
                           catch (Exception e2) {
-                            logger.error("Could not send datagram " + e2.toString() + ": socket = " + remoreAddress);
+                            L.error("Could not send datagram " + e2.toString() + ": socket = " + remoreAddress);
                           }
 			}
 			return true;
 		} catch ( Exception e ) {
-			logger.error("Could not send datagram " + e );
+			L.error("Could not send datagram " + e );
 		}
 		return false;
 	}
 
 	class InternalServer implements Runnable {
-
 		private DatagramChannel channel;
 		private final int port;
 		private final int size;
@@ -130,10 +129,8 @@ public final class UdpServer extends Observable implements Transmitter {
 			thread.start( );
 		}
 
-		public void run( ) {
-
+		public void run() {
 			/* Create a selector to multiplex client connections. */
-
 			try {
 				Selector selector = SelectorProvider.provider( ).openSelector( );
 				channel = DatagramChannel.open( );
@@ -141,7 +138,7 @@ public final class UdpServer extends Observable implements Transmitter {
 				InetSocketAddress isa = ( host == null ) ? new InetSocketAddress( port ) : new InetSocketAddress( host , port );
 				channel.socket( ).bind( isa );
 				channel.register( selector , SelectionKey.OP_READ , ByteBuffer.allocate( size ) );
-				logger.info(  "starting server, listening on port " + port + " (" + isa.getAddress( ).getHostAddress( ) + ":" + isa.getPort( ) + " " + isa.getAddress( ).getLocalHost( )+ ":" + isa.getPort( ) + ")" );
+				L.info("starting server, listening on port " + port + " (" + isa.getAddress( ).getHostAddress( ) + ":" + isa.getPort( ) + " " + isa.getAddress( ).getLocalHost( )+ ":" + isa.getPort( ) + ")");
 
 				/* Let's listen for incoming messages */
 				while ( !Thread.currentThread( ).isInterrupted( ) ) {
@@ -189,12 +186,13 @@ public final class UdpServer extends Observable implements Transmitter {
 
 					}
 				}
-			} catch ( IOException e ) {
-				logger.info(  "Couldn't start UDP server on port " + port + " " + e +" Is there another application using the same port?");
 			}
-			logger.info(  "thread interrupted and closed." );
-		}
+      catch (IOException e) {
+				L.warn("Couldn't start UDP server on port " + port + " " + e +" Is there another application using the same port?");
+			}
 
+			L.info("thread interrupted and closed.");
+		}
 	}
 
 	/* TODO consider to use java.util.concurrent.Executor here instead of Thread. */
