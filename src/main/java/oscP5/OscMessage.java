@@ -645,4 +645,18 @@ public class OscMessage extends OscPacket {
 		return Bytes.getAsString( _myAddrPattern );
 	}
 
+  ///////// 送信元の情報取得
+  /**
+   *
+   */
+  public String getHostAddress() {
+    return hostAddress;
+  }
+
+  /**
+   *
+   */
+  public int getHostPort() {
+    return port;
+  }
 }
