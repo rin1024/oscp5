@@ -80,12 +80,7 @@ import netP5.UdpServer;
  *
  */
 public class OscP5 implements Observer {
-
-	static public boolean DEBUG = false;
-  static public final Logger L = Logger.getLogger(OscP5.class.getName());
-
-	protected Map< String , List< OscPlug >> _myOscPlugMap = new HashMap< String , List< OscPlug >>( );
-	public final static boolean ON = OscProperties.ON;
+  public final static boolean ON = OscProperties.ON;
 	public final static boolean OFF = OscProperties.OFF;
 
 	/* a static variable used when creating an oscP5 instance with a specified network protocol. */
@@ -97,20 +92,27 @@ public class OscP5 implements Observer {
 	/* a static variable used when creating an oscP5 instance with a specified network protocol. */
 	public final static int TCP = OscProperties.TCP;
 
-	private OscProperties _myOscProperties;
+	public static boolean DEBUG = false;
+	
+  protected final static Logger L = Logger.getLogger(OscP5.class.getName());
+	protected Map< String , List< OscPlug >> _myOscPlugMap = new HashMap< String , List< OscPlug >>( );
+
+	private final static String VERSION = Version.version;
+  private final static String BUILD_DATE = Version.buildDate;
+
+  private static int welcome = 0;
+  private static String broadcastAddress;
+
+  private OscProperties _myOscProperties;
 	private Method _myEventMethod;
 	private Method _myPacketMethod;
 	private Class< ? > _myEventClass = OscMessage.class;
 	private boolean isEventMethod;
 	private boolean isPacketMethod;
 	private boolean isBroadcast = false;
-	public static final String VERSION = "2.1.4";
-	static private int welcome = 0;
 	private Transmitter transmit;
 	private Object parent;
-
-        static private String broadcastAddress;
-
+	
 	/**
 	 * default constructor, starts an UDP server with maximum packet size of 1536 bytes.
 	 */

@@ -1,42 +1,88 @@
-group 'processingLibraryTemplate'
-version '1.0-SNAPSHOT'
+// このライブラリのバージョン
+version '2.1.4'
 
+// Javaプラグインを使ってこのプロジェクトをビルドする
 apply plugin: 'java'
 
-defaultTasks 'clean', 'build'
+// $ gradleだけ実行した際に実行されるtask
+defaultTasks 'clean', 'versionSet', 'build'
 
+// Javaソースのコンパイル時に使用するJavaバージョン互換性
 sourceCompatibility = 1.8
 
-rootProject.version=''
-buildDir='library'
-libsDirName='./'
-docsDirName='../reference'
+// jarを生成するディレクトリ名
+buildDir = 'build'
+// ライブラリを生成するディレクトリ名。ビルドディレクトリへの相対パス
+libsDirName = './'
+// ドキュメントを生成するディレクトリ名。ビルドディレクトリへの相対パス
+docsDirName = '../reference'
 
+// Javadocを使って製品JavaソースのAPIドキュメントを生成する
 javadoc {
-    options.charSet = 'UTF-8'
-    options.encoding = 'UTF-8'
+  options.charSet = 'UTF-8'
+  options.encoding = 'UTF-8'
 }
 
+// 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
+// 
 configurations {
-    provided
+  provided
 }
 
+// プロジェクトのソースセット
 sourceSets {
-    main {
-        compileClasspath += configurations.provided
-    }
+  main {
+    compileClasspath += configurations.provided
+  }
 }
 
+// プロジェクトに依存関係を追加する
 dependencies {
-    provided group: 'org.processing', name: 'core', version: '3.3.7'
-    // working with gradle 5.x
-    //testCompile group: 'junit', name: 'junit', version: '4.12'
-    //compile fileTree(dir: 'lib', include: '**/*.jar')
-    // working with gradle 7.2
-    testImplementation 'junit:junit:4.12'
-    implementation fileTree(dir: 'lib', include: ['*.jar'])
+  provided group: 'org.processing', name: 'core', version: '3.3.7'
+  // working with gradle 5.x
+  //testCompile group: 'junit', name: 'junit', version: '4.12'
+  //compile fileTree(dir: 'lib', include: '**/*.jar')
+  // working with gradle 7.2
+  testImplementation 'junit:junit:4.12'
+  implementation fileTree(dir: 'resources/lib', include: ['*.jar'])
+}
+
+// ------------------------------------------------------------
+// バージョンなしのjarファイルの生成
+// P5では、libraryフォルダと、
+// ライブラリのフォルダ名が一致したjarファイルのみ読み込めるため、、、
+// バージョニングはできない、、、
+copy {
+  from "build"
+  into 'library'
+  include "${rootProject.name}-${version}.jar"
+  rename "${rootProject.name}-(.*).jar", "${rootProject.name}.jar"
+}
+
+// ------------------------------------------------------------
+// Version.javaを入れるディレクトリ
+def VERSION_JAVA_FOLDER = 'src/main/java/oscP5'
+
+// gradleでjar生成するバージョンと、javaのクラスファイルに定義するバージョンを一律にするtask
+// https://www.gwtcenter.com/handling-version-number-uniformly-by-gradle
+task versionSet(type: Copy) { 
+  project.delete VERSION_JAVA_FOLDER + '/Version.java'
+  from 'resources/gradle/Version.java'
+  into VERSION_JAVA_FOLDER
+  expand(version: version, buildDate: buildDate()) 
+}
+
+compileJava.dependsOn(['versionSet'])
+
+// ------------------------------------------------------------
+import java.text.SimpleDateFormat;
+
+def buildDate() {
+  def df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+  df.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"))
+  return df.format(new Date())
 }
