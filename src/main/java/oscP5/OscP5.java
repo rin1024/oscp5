@@ -82,7 +82,7 @@ import netP5.UdpServer;
 public class OscP5 implements Observer {
 
 	static public boolean DEBUG = false;
-  static public final Logger logger = Logger.getLogger(OscP5.class.getName());
+  static public final Logger L = Logger.getLogger(OscP5.class.getName());
 
 	protected Map< String , List< OscPlug >> _myOscPlugMap = new HashMap< String , List< OscPlug >>( );
 	public final static boolean ON = OscProperties.ON;
@@ -153,7 +153,7 @@ public class OscP5 implements Observer {
 		isEventMethod = _myEventMethod != null;
 		isPacketMethod = _myPacketMethod != null;
 
-		//logger.info( _myEventMethod + " = " + (isEventMethod ? "true" : "false") + "\n" + _myPacketMethod + " = " + (isPacketMethod ? "true" : "false") );
+		//L.info( _myEventMethod + " = " + (isEventMethod ? "true" : "false") + "\n" + _myPacketMethod + " = " + (isPacketMethod ? "true" : "false") );
 
 		switch ( _myOscProperties.networkProtocol( ) ) {
 		case ( OscProperties.UDP ):
@@ -179,10 +179,10 @@ public class OscP5 implements Observer {
 			}
 			break;
 		case ( OscProperties.MULTICAST ):
-			logger.info("Multicast is not yet implemented with this version. ");
+			L.info("Multicast is not yet implemented with this version. ");
 			break;
 		default:
-			logger.info("Unknown protocol.");
+			L.info(_myOscProperties.networkProtocol( ) + " is Unknown protocol.");
 			break;
 		}
 
@@ -197,7 +197,7 @@ public class OscP5 implements Observer {
 
 	private void welcome( ) {
 		if ( welcome++ < 1 ) {
-			logger.info("OscP5 " + VERSION + " " + "infos, comments, questions at http://www.sojamo.de/libraries/oscP5");
+			L.info("OscP5 " + VERSION + " " + "infos, comments, questions at http://www.sojamo.de/libraries/oscP5");
 		}
 	}
 
@@ -212,7 +212,7 @@ public class OscP5 implements Observer {
 
 	public void stop( ) {
 		/* TODO notify clients and servers. */
-		logger.warn("stopping oscP5.");
+		L.info("stopping oscP5.");
 	}
 
 	public void addListener( OscEventListener theListener ) {
@@ -247,7 +247,7 @@ public class OscP5 implements Observer {
 					parent = theObject;
 				}
 			} catch ( Exception e ) {
-				logger.debug( "OscP5.registerDispose()" + "registerDispose failed (1)" + e.getCause( ) );
+				L.debug( "OscP5.registerDispose()" + "registerDispose failed (1)" + e.getCause( ) );
 			}
 
 			try {
@@ -255,15 +255,15 @@ public class OscP5 implements Observer {
 				try {
 					method.invoke( parent , new Object[] { "dispose" , this } );
 				} catch ( Exception e ) {
-					logger.debug( "OscP5.registerDispose()" + "registerDispose failed (2)" + e.getCause( ) );
+					L.debug( "OscP5.registerDispose()" + "registerDispose failed (2)" + e.getCause( ) );
 				}
 
 			} catch ( NoSuchMethodException e ) {
-				logger.debug( "OscP5.registerDispose()" + "registerDispose failed (3)" + e.getCause( ) );
+				L.debug( "OscP5.registerDispose()" + "registerDispose failed (3)" + e.getCause( ) );
 			}
 
 		} catch ( NullPointerException e ) {
-			logger.debug( "OscP5.registerDispose()" + "registerDispose failed (4)" + e.getCause( ) );
+			L.debug( "OscP5.registerDispose()" + "registerDispose failed (4)" + e.getCause( ) );
 		}
 	}
 
@@ -402,12 +402,12 @@ public class OscP5 implements Observer {
 		try {
 			theMethod.invoke( theObject , theArgs );
 		} catch ( IllegalArgumentException e ) {
-			logger.error(e.toString());
+			L.error(e.toString());
 		} catch ( IllegalAccessException e ) {
-			logger.error(e.toString());
+			L.error(e.toString());
 		} catch ( InvocationTargetException e ) {
-			logger.error(e.toString());
-			logger.warn("An error occured while forwarding an OscMessage\n " + "to a method in your program. please check your code for any \n" + "possible errors that might occur in the method where incoming\n "
+			L.error(e.toString());
+			L.warn("An error occured while forwarding an OscMessage\n " + "to a method in your program. please check your code for any \n" + "possible errors that might occur in the method where incoming\n "
 			    + "OscMessages are parsed e.g. check for casting errors, possible\n " + "nullpointers, array overflows ... .\n" + "method in charge : " + theMethod.getName( ) + "  " + e );
 		}
 
@@ -426,7 +426,7 @@ public class OscP5 implements Observer {
                           callMethod( ( OscMessage ) thePacket );
                         }
                         catch (ClassCastException e) {
-                          logger.error( e.toString());
+                          L.error( e.toString());
                         }
 		} else if ( thePacket instanceof OscBundle ) {
 			if ( isPacketMethod ) {
@@ -511,21 +511,21 @@ public class OscP5 implements Observer {
 					( ( SocketChannel ) theRemoteSocket ).write( buffer );
 					return true;
 				} catch ( IOException e ) {
-					logger.error(e.toString());
+					L.error(e.toString());
 				}
 			} else if ( theRemoteSocket instanceof DatagramChannel ) {
 				try {
 					DatagramChannel d = ( ( DatagramChannel ) theRemoteSocket );
 
-					logger.info( String.format( "channel :  " + d.isConnected( ) + " " + d.socket( ).getInetAddress( ) ) );
+					L.info( String.format( "channel :  " + d.isConnected( ) + " " + d.socket( ).getInetAddress( ) ) );
 					( ( DatagramChannel ) theRemoteSocket ).write( buffer );
 					return true;
 				} catch ( IOException e ) {
-					logger.error(e.toString());
+					L.error(e.toString());
 				} catch ( NotYetConnectedException e ) {
 					/* received a datagram packet, sender ip and port have been identified but we
 					 * are not able to connect to remote address due to no open socket availability. */
-					// logger.error(e.toString());
+					// L.error(e.toString());
 				}
 			}
 		}
@@ -553,7 +553,7 @@ public class OscP5 implements Observer {
 				bos.close( );
 			} catch ( IOException e ) {
 				// TODO Auto-generated catch block
-				logger.error(e.toString());
+				L.error(e.toString());
 			}
 		}
 		return bytes;
@@ -568,17 +568,17 @@ public class OscP5 implements Observer {
 			o = in.readObject( );
 		} catch ( IOException e ) {
 			// TODO Auto-generated catch block
-			logger.error(e.toString());
+			L.error(e.toString());
 		} catch ( ClassNotFoundException e ) {
 			// TODO Auto-generated catch block
-			logger.error(e.toString());
+			L.error(e.toString());
 		} finally {
 			try {
 				bis.close( );
 				in.close( );
 			} catch ( IOException e ) {
 				// TODO Auto-generated catch block
-				logger.error(e.toString());
+				L.error(e.toString());
 			}
 		}
 		return o;
