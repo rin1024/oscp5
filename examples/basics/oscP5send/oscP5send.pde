@@ -10,9 +10,9 @@
  
 import oscP5.*;
 import netP5.*;
+import org.apache.log4j.Logger;
 
 OscP5 osc;
-
 NetAddress receiver;
 
 float r,g,b;
@@ -33,8 +33,13 @@ void draw() {
 
 void mousePressed() {
   /* send an OSC message to NetAddress addr */
-  osc.send( receiver , "/test" , random( 255 ) , random( 255 ) , random( 255 ) );
+  //osc.send( receiver , "/test" , random( 255 ) , random( 255 ) , random( 255 ) );
   
+    OscMessage msg = new OscMessage("/sound/seek");
+    msg.add("aaaa");
+    msg.add(1234);
+    osc.send(receiver, msg);
+        
   /* breakdown of parameters
    * 1) receiver's NetAddress
    * 2) the address pattern of the OSC-Message 
@@ -58,5 +63,3 @@ void oscEvent( OscMessage m ) {
   }
   
 }
-
-
