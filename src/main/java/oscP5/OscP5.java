@@ -214,7 +214,7 @@ public class OscP5 implements Observer {
 
 	public void stop( ) {
 		/* TODO notify clients and servers. */
-		L.info("stopping oscP5.");
+		//L.info("stopping oscP5.");
 	}
 
 	public void addListener( OscEventListener theListener ) {
