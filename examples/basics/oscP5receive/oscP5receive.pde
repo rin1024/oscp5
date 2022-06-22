@@ -10,6 +10,7 @@
  
 import oscP5.*;
 import netP5.*;
+import  org.apache.log4j.Logger;
   
 OscP5 oscP5;
 
@@ -51,7 +52,7 @@ void draw() {
 
 void mousePressed() {
   /* send a message on mouse pressed */
-  oscP5.send( receiver , "/change" , random(100,300) , random(100,300) , random(-PI,PI) );  
+  oscP5.send( receiver , "/get/currentInfo" , random(100,300) , random(100,300) , random(-PI,PI) );  
 }
 
 
@@ -69,5 +70,3 @@ void oscEvent( OscMessage m ) {
   }
   println();
 }
-
-
