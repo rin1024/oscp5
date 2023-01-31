@@ -234,12 +234,10 @@ public class OscP5 implements Observer {
    */
   private void registerDispose( Object theObject ) {
     try {
-
       Object parent = null;
       String child = "processing.core.PApplet";
 
       try {
-
         Class< ? > childClass = Class.forName( child );
         Class< ? > parentClass = Object.class;
         if ( parentClass.isAssignableFrom( childClass ) ) {
@@ -267,6 +265,15 @@ public class OscP5 implements Observer {
     }
   }
 
+  /**
+   * PApplet(parent)がoscEvent methodを保持しているか確認する
+   *
+   * @param theObject instance of PApplet
+   * @param theMethod method name like "oscEvent"
+   * @param theClass define OscMessage like "new Class< ? >[] { OscMessage.class }"
+   *
+   * @return Method
+   */
   private Method checkEventMethod( Object theObject , String theMethod , Class< ? >[] theClass ) {
     Method method = null;
     try {
@@ -354,15 +361,12 @@ public class OscP5 implements Observer {
   }
 
   private void callMethod( final OscMessage theOscMessage ) throws ClassCastException {
-
     /* forward the received message to all OscEventListeners */
-
     for ( int i = listeners( ).size( ) - 1 ; i >= 0 ; i-- ) {
       ( ( OscEventListener ) listeners( ).get( i ) ).oscEvent( theOscMessage );
     }
 
     /* check if the arguments can be forwarded as array */
-
     if ( theOscMessage.isArray ) {
       if ( _myOscPlugMap.containsKey( theOscMessage.getAddress( ) ) ) {
         List< OscPlug > myOscPlugList = _myOscPlugMap.get( theOscMessage.getAddress( ) );
@@ -385,7 +389,6 @@ public class OscP5 implements Observer {
     }
 
     /* if no plug method was detected, then use the default oscEvent method */
-
     if ( isEventMethod ) {
       try {
         invoke( parent , _myEventMethod , new Object[] { theOscMessage } );
@@ -394,11 +397,16 @@ public class OscP5 implements Observer {
         throw new ClassCastException(e.toString());
       }
     }
-
   }
 
+  /**
+   * 対象のtheObjectにtheMethodをhookさせる?
+   *
+   * @param theObject instance of PApplet
+   * @param theMethod instance of Method
+   * @param theArgs arguments
+   */
   private void invoke( final Object theObject , final Method theMethod , final Object[] theArgs ) {
-
     try {
       theMethod.invoke( theObject , theArgs );
     } catch ( IllegalArgumentException e ) {
@@ -410,7 +418,6 @@ public class OscP5 implements Observer {
       L.warn("An error occured while forwarding an OscMessage\n " + "to a method in your program. please check your code for any \n" + "possible errors that might occur in the method where incoming\n "
           + "OscMessages are parsed e.g. check for casting errors, possible\n " + "nullpointers, array overflows ... .\n" + "method in charge : " + theMethod.getName( ) + "  " + e );
     }
-
   }
 
   public void process( Object o ) {
