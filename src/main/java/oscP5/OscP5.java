@@ -92,8 +92,6 @@ public class OscP5 implements Observer {
   /* a static variable used when creating an oscP5 instance with a specified network protocol. */
   public final static int TCP = OscProperties.TCP;
 
-  public static boolean DEBUG = false;
-
   protected final static Logger L = Logger.getLogger(OscP5.class.getName());
   protected Map< String , List< OscPlug >> _myOscPlugMap = new HashMap< String , List< OscPlug >>( );
 
