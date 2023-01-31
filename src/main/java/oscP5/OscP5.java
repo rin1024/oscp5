@@ -212,9 +212,9 @@ public class OscP5 implements Observer {
 		stop( );
 	}
 
+  /* TODO notify clients and servers. */
 	public void stop( ) {
-		/* TODO notify clients and servers. */
-		//L.info("stopping oscP5.");
+		L.info("stopping oscP5.");
 	}
 
 	public void addListener( OscEventListener theListener ) {
@@ -629,115 +629,6 @@ public class OscP5 implements Observer {
 		} catch ( Exception e ) {}
 	}
 
-	/* DEPRECATED methods and constructors. */
-
-	@Deprecated public void process( final DatagramPacket thePacket , final int thePort ) throws SocketException, IOException {
-		/* TODO , process( Map ) should be used. */
-	}
-
-	@Deprecated public static void flush( final OscMessage theOscMessage , final NetAddress theNetAddress ) throws SocketException, IOException {
-		flush( theOscMessage.getBytes( ) , theNetAddress );
-	}
-
-	@Deprecated public static void flush( final OscPacket theOscPacket , final NetAddress theNetAddress ) throws SocketException, IOException {
-		flush( theOscPacket.getBytes( ) , theNetAddress );
-	}
-
-	@Deprecated public static void flush( final String theAddrPattern , final Object[] theArguments , final NetAddress theNetAddress ) throws SocketException, IOException {
-		flush( ( new OscMessage( theAddrPattern , theArguments ) ).getBytes( ) , theNetAddress );
-	}
-
-	@Deprecated public static void flush( final byte[] theBytes , final NetAddress theNetAddress ) throws SocketException, IOException {
-		DatagramSocket mySocket;
-		try {
-			mySocket = new DatagramSocket( );
-
-			DatagramPacket myPacket = new DatagramPacket( theBytes , theBytes.length , theNetAddress.inetaddress( ) , theNetAddress.port( ) );
-			mySocket.send( myPacket );
-                        mySocket.disconnect();
-			mySocket.close();
-                        mySocket = null;
-		}
-                catch (SocketException e) {
-                  throw new SocketException(e.toString());
-                }
-                catch (IOException e) {
-                  throw new IOException(e.toString());
-                }
-	}
-
-	@Deprecated public static void flush( final byte[] theBytes , final String theAddress , final int thePort ) throws SocketException, IOException {
-		flush( theBytes , new NetAddress( theAddress , thePort ) );
-	}
-
-	@Deprecated public static void flush( final OscMessage theOscMessage , final String theAddress , final int thePort ) throws SocketException, IOException {
-		flush( theOscMessage.getBytes( ) , new NetAddress( theAddress , thePort ) );
-	}
-
-	@Deprecated public OscP5( final Object theParent , final String theHost , final int theSendToPort , final int theReceiveAtPort , final String theMethodName ) {
-
-		welcome( );
-
-		parent = theParent;
-
-		registerDispose( parent );
-
-		/* TODO */
-	}
-
-	@Deprecated public OscMessage newMsg( String theAddrPattern ) {
-		return new OscMessage( theAddrPattern );
-	}
-
-	@Deprecated public OscBundle newBundle( ) {
-		return new OscBundle( );
-	}
-
-	/**
-	 * used by the monome library by jklabs
-	 */
-	@Deprecated public void disconnectFromTEMP( ) {
-	}
-
-	@Deprecated public OscP5( final Object theParent , final String theAddress , final int thePort ) {
-		// this( theParent , theAddress , thePort , OscProperties.MULTICAST );
-		parent = theParent;
-	}
-
-	@Deprecated public void send( final String theAddrPattern , final Object[] theArguments , final NetAddress theNetAddress ) {
-		/* TODO */
-		// _myOscNetManager.send( theAddrPattern , theArguments , theNetAddress );
-	}
-
-	@Deprecated public void send( final String theAddrPattern , final Object[] theArguments , final NetAddressList theNetAddressList ) {
-		/* TODO */
-		// _myOscNetManager.send( theAddrPattern , theArguments , theNetAddressList );
-	}
-
-	@Deprecated public void send( final String theAddrPattern , final Object[] theArguments , final String theAddress , int thePort ) {
-		transmit.send( new OscMessage( theAddrPattern , theArguments ).getBytes( ) , theAddress , thePort );
-	}
-
-	@Deprecated public void send( final String theAddrPattern , final Object[] theArguments , final TcpClient theClient ) {
-		send( new OscMessage( theAddrPattern , theArguments ) , theClient );
-	}
-
-	@Deprecated public void send( final OscPacket thePacket , final NetAddress theNetAddress ) {
-		send( theNetAddress , thePacket );
-	}
-
-	@Deprecated public void send( final OscPacket thePacket , final NetAddressList theNetAddressList ) {
-		/* TODO */
-		// _myOscNetManager.send( thePacket , theNetAddressList );
-	}
-
-	@Deprecated public void send( final String theAddress , final int thePort , final String theAddrPattern , final Object ... theArguments ) {
-		transmit.send( new OscMessage( theAddrPattern , theArguments ).getBytes( ) , theAddress , thePort );
-	}
-
-	@Deprecated public void send( final OscPacket thePacket , final TcpClient theClient ) {
-	}
-
 	public void send( final NetAddressList theNetAddressList , final OscPacket thePacket ) {
 		/* TODO */
 		// _myOscNetManager.send( thePacket , theNetAddressList );
@@ -746,16 +637,6 @@ public class OscP5 implements Observer {
 	public void send( final NetAddressList theNetAddressList , final String theAddrPattern , final Object ... theArguments ) {
 		/* TODO */
 		// _myOscNetManager.send( theNetAddressList , theAddrPattern , theArguments );
-	}
-
-	@Deprecated public static void setLogStatus( final int theIndex , final int theValue ) {
-	}
-
-	@Deprecated public static void setLogStatus( final int theValue ) {
-	}
-
-	@Deprecated public NetInfo netInfo( ) {
-		return new NetInfo( );
 	}
 
 	/* Notes */
@@ -767,5 +648,3 @@ public class OscP5 implements Observer {
     broadcastAddress = _broadcastAddress;
   }
 }
-
-
