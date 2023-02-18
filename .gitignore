@@ -5,6 +5,7 @@
 build/tmp
 build/google-java-format
 resources/lib
+library/tmp
 
 .DS_Store
 *un~
