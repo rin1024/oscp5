@@ -7,6 +7,7 @@ public class Version {
 
   /**
    * バージョン情報を返す
+   *
    * @return version
    */
   public static String getVersion() {
@@ -15,6 +16,7 @@ public class Version {
 
   /**
    * コンパイルした日時を返す
+   *
    * @return buildDate
    */
   public static String getBuildDate() {
