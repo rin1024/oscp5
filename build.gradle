@@ -1,3 +1,8 @@
+// Google Java Formatに則った変換を行う
+plugins {
+  id 'com.github.sherter.google-java-format' version '0.9'
+}
+
 // このライブラリのバージョン
 version '2.1.4'
 
@@ -5,7 +10,7 @@ version '2.1.4'
 apply plugin: 'java'
 
 // $ gradleだけ実行した際に実行されるtask
-defaultTasks 'clean', 'versionSet', 'build'
+defaultTasks 'clean', 'versionSet', 'googleJavaFormat', 'build' /*, 'javadoc'*/, 'copyJar'
 
 // Javaソースのコンパイル時に使用するJavaバージョン互換性
 sourceCompatibility = 1.8
@@ -18,10 +23,10 @@ libsDirName = './'
 docsDirName = '../reference'
 
 // Javadocを使って製品JavaソースのAPIドキュメントを生成する
-javadoc {
-  options.charSet = 'UTF-8'
-  options.encoding = 'UTF-8'
-}
+//javadoc {
+//  options.charSet = 'UTF-8'
+//  options.encoding = 'UTF-8'
+//}
 
 // 
 repositories {
@@ -47,20 +52,28 @@ dependencies {
   //testCompile group: 'junit', name: 'junit', version: '4.12'
   //compile fileTree(dir: 'lib', include: '**/*.jar')
   // working with gradle 7.2
-  testImplementation 'junit:junit:4.12'
+  testImplementation 'junit:junit:4.13.2'
   implementation fileTree(dir: 'resources/lib', include: ['*.jar'])
 }
 
-// ------------------------------------------------------------
-// バージョンなしのjarファイルの生成
-// P5では、libraryフォルダと、
-// ライブラリのフォルダ名が一致したjarファイルのみ読み込めるため、、、
-// バージョニングはできない、、、
-copy {
-  from "build"
-  into 'library'
-  include "${rootProject.name}-${version}.jar"
-  rename "${rootProject.name}-(.*).jar", "${rootProject.name}.jar"
+// test時のエラーログを詳細化
+test {
+  testLogging {
+    // テスト時の標準出力と標準エラー出力を表示する
+    showStandardStreams true
+    // イベントを出力する (TestLogEvent)
+    events 'passed', 'failed'//, 'started', 'skipped'
+    // 例外発生時の出力設定 (TestExceptionFormat)
+    exceptionFormat 'full'
+  }
+}
+
+// errorのdetailを出すように
+gradle.projectsEvaluated {
+  tasks.withType(JavaCompile){
+    options.compilerArgs << "-Xlint:deprecation"
+    options.compilerArgs << "-Xlint:unchecked"
+  }
 }
 
 // ------------------------------------------------------------
@@ -74,11 +87,14 @@ task versionSet(type: Copy) {
   from 'resources/gradle/Version.java'
   into VERSION_JAVA_FOLDER
   expand(version: version, buildDate: buildDate()) 
+  dependsOn(['verifyGoogleJavaFormat', 'googleJavaFormat'])
 }
 
+// compileJavaの前にversionSetタスクが実行されるように
 compileJava.dependsOn(['versionSet'])
 
 // ------------------------------------------------------------
+// コンパイルした日付を取得する
 import java.text.SimpleDateFormat;
 
 def buildDate() {
@@ -86,3 +102,19 @@ def buildDate() {
   df.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"))
   return df.format(new Date())
 }
+
+// ------------------------------------------------------------
+// バージョンなしのjarファイルの生成
+// P5では、libraryフォルダと、ライブラリのフォルダ名が一致したjarファイルのみ読み込むため、
+// バージョニングファイルは利用できない
+task copyJar(type: Copy) { 
+  project.delete "build/${rootProject.name}.jar"
+  from "build"
+  into 'library'
+  include "${rootProject.name}-${version}.jar"
+  rename "${rootProject.name}-(.*).jar", "${rootProject.name}.jar"
+  dependsOn(['verifyGoogleJavaFormat', 'googleJavaFormat', 'compileJava'])
+}
+
+// copyJarはcompileJava後になるように
+copyJar.dependsOn(['compileJava', 'jar'])
