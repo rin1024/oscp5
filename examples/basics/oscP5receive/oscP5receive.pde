@@ -20,9 +20,13 @@ void settings() {
 }
 
 void setup() {
-  oscP5 = new OscP5( this , 54445 );
+  String theRemoteAddress = "192.168.0.1";
+  int theRemotePort = 54445;
+  OscProtocols theProtocol = OscProtocols.UDP;
+  //oscP5 = new OscP5( this , theRemoteAddress, theRemotePort, theProtocol );
+  oscP5 = new OscP5( this , theRemotePort );
 
-  println("ip: " + oscP5.ip());
+  //println("ip: " + oscP5.ip());
 }
 
 void draw() {

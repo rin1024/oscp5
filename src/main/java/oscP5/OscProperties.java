@@ -33,9 +33,7 @@ public class OscProperties {
 
   public static final boolean ON = true;
   public static final boolean OFF = false;
-  public static final int UDP = 0;
-  public static final int MULTICAST = 1;
-  public static final int TCP = 2;
+
   private boolean isLocked = false;
   private final List<OscEventListener> listeners = new Vector<OscEventListener>();
   public static final NetAddress defaultnetaddress = new NetAddress("", 0);
@@ -43,7 +41,7 @@ public class OscProperties {
   private int _myListeningPort = 0; /* default listening port */
   private int _myDatagramSize = 1536; /* default datagram buffer size */
   private String _myDefaultEventMethodName = "oscEvent";
-  private int _myNetworkProtocol = UDP;
+  private OscProtocols _myNetworkProtocol = OscProtocols.UDP;
   private String _myHost = "0.0.0.0";
   private boolean _mySendStatus = false;
   private boolean _mySRSP = OFF; // (S)end (R)eceive (S)ame (P)ort
@@ -116,9 +114,9 @@ public class OscProperties {
    * and OscProperties.MULTICAST the network protocol can only be set before initializing oscP5.
    * TODO
    */
-  public OscProperties setNetworkProtocol(final int theProtocol) {
+  public OscProperties setNetworkProtocol(final OscProtocols theProtocol) {
     if (!isLocked) {
-      if (theProtocol > 2) {
+      if (theProtocol == OscProtocols.UNDEFINED) {
         System.out.println(
             "OscProperties.setNetworkProtocol, not in the range of supported Network protocols. the network protocol defaults to UDP");
       } else {
@@ -160,7 +158,7 @@ public class OscProperties {
    * returns the network protocol being used to transmit osc packets. returns an int. 0 (UDP), 1
    * (MULTICAST), 2 (TCP)
    */
-  public int networkProtocol() {
+  public OscProtocols networkProtocol() {
     return _myNetworkProtocol;
   }
 
@@ -170,10 +168,7 @@ public class OscProperties {
    * @return String
    */
   public String toString() {
-    String s =
-        "\nnetwork protocol: "
-            + ((new String[] {"udp", "tcp", "multicast"})[_myNetworkProtocol])
-            + "\n";
+    String s = "\nnetwork protocol: " + _myNetworkProtocol + "\n";
     s +=
         "host: "
             + ((_myRemoteAddress.address() != null)

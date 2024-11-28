@@ -32,9 +32,9 @@ void setup() {
   osc = new OscP5( this , 12000 );
   
   /* create a NetAddress which requires the receiver's IP address and port number */
-  receiver = new NetAddress( "127.0.0.1" , 12000 );
+  receiver = new NetAddress( "127.0.0.1" , 8091 );
 
-  println("ip: " + osc.ip());
+  //println("ip: " + osc.ip());
 }
 
 void draw() {
@@ -45,10 +45,10 @@ void mousePressed() {
   /* send an OSC message to NetAddress addr */
   //osc.send( receiver , "/test" , random( 255 ) , random( 255 ) , random( 255 ) );
   
-    OscMessage msg = new OscMessage("/sound/seek");
-    msg.add("aaaa");
-    msg.add(1234);
-    osc.send(receiver, msg);
+  OscMessage msg = new OscMessage("/sound/seek");
+  msg.add("aaaa");
+  msg.add(1234);
+  osc.send(receiver, msg);
         
   /* breakdown of parameters
    * 1) receiver's NetAddress
@@ -63,13 +63,11 @@ void mousePressed() {
 }
 
 /* oscEvent(OscMessage) will wait for incoming OSC messages. */
-void oscEvent( OscMessage m ) {
-  
-  /* check if an incoming OSC message matches a particular address pattern */
+/*void oscEvent( OscMessage m ) {
+  // check if an incoming OSC message matches a particular address pattern
   if( m.getAddress().equals( "/test") ) {
     r = m.floatValue( 0 );
     g = m.floatValue( 1 );
     b = m.floatValue( 2 );
   }
-  
-}
+}*/
