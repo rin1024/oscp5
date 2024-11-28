@@ -11,20 +11,30 @@
 import oscP5.*;
 import netP5.*;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
+protected final Logger L = Logger.getLogger(getClass());
 
 OscP5 osc;
 NetAddress receiver;
 
 float r,g,b;
 
+void settings() {
+  System.setProperty("logging.dir", dataPath("../log/"));
+  PropertyConfigurator.configure(dataPath("log4j.properties"));
+
+  size(400,400);
+}
+
 void setup() {
-  size( 400 , 400 );
-  
   /* create a new instance of OscP5, the second parameter indicates the listening port */
   osc = new OscP5( this , 12000 );
   
   /* create a NetAddress which requires the receiver's IP address and port number */
   receiver = new NetAddress( "127.0.0.1" , 12000 );
+
+  println("ip: " + osc.ip());
 }
 
 void draw() {
@@ -49,7 +59,7 @@ void mousePressed() {
    * arguments here can be of type int, float, double, String, boolean, blob (byte-array)
    * see OSC specifications 1.0 http://opensoundcontrol.org/spec-1_0  
   */
-  
+  println(msg);
 }
 
 /* oscEvent(OscMessage) will wait for incoming OSC messages. */
