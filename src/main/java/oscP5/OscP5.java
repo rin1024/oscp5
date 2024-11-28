@@ -158,8 +158,10 @@ public class OscP5 implements Observer {
    * @param theProperties The OSC configuration properties.
    */
   private void init(Object theParent, OscProperties theProperties) {
-    welcome();
-    L.debug(theProperties);
+    if (welcome++ < 1) {
+      L.debug("OscP5 " + VERSION);
+      L.debug(theProperties);
+    }
 
     // Parent setup
     parent = (theParent == null) ? new Object() : theParent;
@@ -220,17 +222,6 @@ public class OscP5 implements Observer {
   public void update(Observable ob, Object map) {
     // OSCパケットを受信した際に呼び出される。引数はマップ型を想定している。
     process(map);
-  }
-
-  // 初回実行時にライブラリのバージョン情報を出力する。
-  private void welcome() {
-    if (welcome++ < 1) {
-      L.info(
-          "OscP5 "
-              + VERSION
-              + " "
-              + "infos, comments, questions at http://www.sojamo.de/libraries/oscP5");
-    }
   }
 
   // バージョン情報を返す。
