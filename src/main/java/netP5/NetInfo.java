@@ -35,23 +35,23 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public class NetInfo {
 
-  private static final Logger LOGGER = Logger.getLogger(NetInfo.class.getName());
+  private static final Logger L = Logger.getLogger(NetInfo.class.getName());
 
   public NetInfo() {}
 
   public static void print() {
     try {
       java.net.InetAddress i1 = java.net.InetAddress.getLocalHost();
-      System.out.println("### hostname/ip : " + i1); // name and IP address
-      System.out.println("### hostname : " + i1.getHostName()); // name
-      System.out.println("### ip : " + i1.getHostAddress()); // IP address
+      L.debug("### hostname/ip : " + i1); // name and IP address
+      L.debug("### hostname : " + i1.getHostName()); // name
+      L.debug("### ip : " + i1.getHostAddress()); // IP address
       // only
     } catch (Exception e) {
-      e.printStackTrace();
+      L.error(e);
     }
   }
 
@@ -60,12 +60,13 @@ public class NetInfo {
       java.net.InetAddress i = java.net.InetAddress.getLocalHost();
       return i.getHostAddress();
     } catch (Exception e) {
+      L.warn(e);
     }
     return "ERROR";
   }
 
   public static String lan() {
-    LOGGER.info("host address : " + getHostAddress());
+    L.info("host address : " + getHostAddress());
     return getHostAddress();
   }
 
@@ -75,11 +76,11 @@ public class NetInfo {
     URL u = null;
     String URLstring = "http://checkip.dyndns.org";
     boolean isConnectedToInternet = false;
-    LOGGER.info("Checking internet  connection ...");
+    L.info("Checking internet  connection ...");
     try {
       u = new URL(URLstring);
     } catch (MalformedURLException e) {
-      LOGGER.warning("Bad URL " + URLstring + " " + e);
+      L.warn("Bad URL " + URLstring + " " + e);
     }
 
     InputStream in = null;
@@ -87,7 +88,7 @@ public class NetInfo {
       in = u.openStream();
       isConnectedToInternet = true;
     } catch (IOException e) {
-      LOGGER.warning(
+      L.warn(
           "Unable to open  "
               + URLstring
               + "\n"
@@ -114,11 +115,11 @@ public class NetInfo {
           if (myToken.compareTo("Address:") == 0) {
             myToken = st.nextToken();
             myIp = myToken;
-            LOGGER.info("WAN address : " + myIp);
+            L.info("WAN address : " + myIp);
           }
         }
       } catch (IOException e) {
-        LOGGER.warning("I/O error reading  " + URLstring + " Exception = " + e);
+        L.warn("I/O error reading  " + URLstring + " Exception = " + e);
       }
     }
     return myIp;

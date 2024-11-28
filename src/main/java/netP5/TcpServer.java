@@ -41,11 +41,11 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public final class TcpServer extends Observable implements Transmitter {
 
-  private static final Logger LOGGER = Logger.getLogger(TcpServer.class.getName());
+  private static final Logger L = Logger.getLogger(TcpServer.class.getName());
   private Selector selector;
   private final List<SelectionKey> clients = new ArrayList<SelectionKey>();
   private final byte[] emptybuffer = new byte[0];
@@ -86,14 +86,14 @@ public final class TcpServer extends Observable implements Transmitter {
       clients.add(clientKey);
       // notification( emptybuffer , SelectionKey.OP_CONNECT , clientKey );
     } catch (Exception e) {
-      LOGGER.warning("Failed to accept new client.");
+      L.warn("Failed to accept new client.");
       e.printStackTrace();
     }
 
     for (SelectionKey client : clients) {
-      System.out.println(client + " " + ((SocketChannel) client.channel()));
+      L.debug(client + " " + ((SocketChannel) client.channel()));
     }
-    System.out.println(String.format("size %d", clients.size()));
+    L.debug(String.format("size %d", clients.size()));
   }
 
   /**
@@ -109,12 +109,12 @@ public final class TcpServer extends Observable implements Transmitter {
       len = channel.read(bb);
       if (len < 0) {
         disconnect(sk);
-        System.out.println("Disconnecting " + channel + "; client size = " + clients.size());
+        L.debug("Disconnecting " + channel + "; client size = " + clients.size());
         return;
       }
       notification(bb.array(), SelectionKey.OP_READ, sk);
     } catch (Exception e) {
-      LOGGER.warning("Failed to read from client.");
+      L.warn("Failed to read from client.");
       e.printStackTrace();
       return;
     }
@@ -188,8 +188,7 @@ public final class TcpServer extends Observable implements Transmitter {
         notification(emptybuffer, SelectionKey.OP_WRITE, sk);
       }
     } catch (Exception e) {
-      System.out.println("Failed to write to client.");
-      e.printStackTrace();
+      L.warn("Failed to write to client. " + e);
     }
 
     /* If there is no more data to be written, remove interest in OP_WRITE. */
@@ -201,15 +200,14 @@ public final class TcpServer extends Observable implements Transmitter {
   private void disconnect(SelectionKey sk) {
     SocketChannel channel = (SocketChannel) sk.channel();
 
-    System.out.println("disconnecting; size=" + clients.size());
+    L.debug("disconnecting; size=" + clients.size());
     notification(emptybuffer, 0, sk);
     clients.remove(sk); /* TODO does not remove properly */
-    System.out.println("disconnected; size=" + clients.size());
+    L.debug("disconnected; size=" + clients.size());
     try {
       channel.close();
     } catch (Exception e) {
-      LOGGER.warning("Failed to close client socket channel.");
-      e.printStackTrace();
+      L.warn("Failed to close client socket channel. " + e);
     }
   }
 
@@ -268,7 +266,7 @@ public final class TcpServer extends Observable implements Transmitter {
         /* Register the socket for select events. */
         SelectionKey acceptKey = channel.register(selector, SelectionKey.OP_ACCEPT);
 
-        LOGGER.info("Starting server at " + isa);
+        L.info("Starting server at " + isa);
 
         /* Loop forever. */
         for (; ; ) {
@@ -292,7 +290,7 @@ public final class TcpServer extends Observable implements Transmitter {
           }
         }
       } catch (Exception e) {
-        System.out.println(e);
+        L.warn(e);
       }
     }
   }
@@ -324,7 +322,7 @@ public final class TcpServer extends Observable implements Transmitter {
         new Observer() {
 
           public void update(Observable o, Object arg) {
-            System.out.println("received a packet " + arg);
+            L.debug("received a packet " + arg);
           }
         });
   }
