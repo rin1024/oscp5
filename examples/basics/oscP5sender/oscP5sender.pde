@@ -50,33 +50,50 @@ void draw() {
   background( r, g, b );
 }
 
+void keyReleased() {
+  OscMessage msg = new OscMessage("/colors");
+  msg.add("color");
+  msg.add((char)(keyCode));
+  osc.send(receiver, msg);
+  println(msg);
+  
+  switch (keyCode) {
+    case 'R': {
+      r = 255;
+      g = 1;
+      b = 1;
+      break;
+    }
+    case 'G': {
+      r = 1;
+      g = 255;
+      b = 1;
+      break;
+    }
+    case 'B': {
+      r = 1;
+      g = 1;
+      b = 255;
+      break;
+    }
+    default: {
+      r = 0;
+      g = 0;
+      b = 0;
+      break;
+    }
+  };
+}
+
+/*
 void mousePressed() {
-  /* send an OSC message to NetAddress addr */
+  // send an OSC message to NetAddress addr
   //osc.send( receiver , "/test" , random( 255 ) , random( 255 ) , random( 255 ) );
 
   OscMessage msg = new OscMessage("/sound/seek");
   msg.add("aaaa");
   msg.add(1234);
   osc.send(receiver, msg);
-
-  /* breakdown of parameters
-   * 1) receiver's NetAddress
-   * 2) the address pattern of the OSC-Message
-   * 3-5) the arguments of the OSC-Message, here we add 3 arguments each of type
-   * float which will result in a 3 characters long typetag fff
-   *
-   * arguments here can be of type int, float, double, String, boolean, blob (byte-array)
-   * see OSC specifications 1.0 http://opensoundcontrol.org/spec-1_0
-   */
   println(msg);
 }
-
-/* oscEvent(OscMessage) will wait for incoming OSC messages. */
-/*void oscEvent( OscMessage m ) {
- // check if an incoming OSC message matches a particular address pattern
- if( m.getAddress().equals( "/test") ) {
- r = m.floatValue( 0 );
- g = m.floatValue( 1 );
- b = m.floatValue( 2 );
- }
- }*/
+*/
