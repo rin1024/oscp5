@@ -159,8 +159,7 @@ public class OscP5 implements Observer {
    */
   private void init(Object theParent, OscProperties theProperties) {
     if (welcome++ < 1) {
-      L.debug("OscP5 " + VERSION);
-      L.debug(theProperties);
+      L.debug("[OscP5 " + VERSION + "]" + theProperties.toString().replaceAll("[\r\n]", ", "));
     }
 
     // Parent setup
