@@ -16,6 +16,8 @@ import org.apache.log4j.PropertyConfigurator;
 protected final Logger L = Logger.getLogger(getClass());
 String LOG_FILE_PATH = "record.txt";
 
+final int MY_OSC_PORT = 54445;//10000;
+
 final String TARGET_OSC_IP_ADDRESS = "localhost";
 final int TARGET_OSC_PORT = 10000;
 
@@ -48,11 +50,8 @@ void setup() {
   //textAlign(CENTER);
   textSize(20);
 
-  String theRemoteAddress = "127.0.0.1";
-  int theRemotePort = 54445;
   OscProtocols theProtocol = OscProtocols.UDP;
-  //oscP5 = new OscP5( this , theRemoteAddress, theRemotePort, theProtocol );
-  oscP5 = new OscP5( this, theRemotePort );
+  oscP5 = new OscP5( this, MY_OSC_PORT );
   //println("ip: " + oscP5.ip());
   
   receiver = new NetAddress(TARGET_OSC_IP_ADDRESS, TARGET_OSC_PORT);
@@ -244,6 +243,15 @@ void readNextPacket() {
       println("[" + currentIndex + "]" + line);
       String[] stringPacket = line.split("\t");
       ArrayList<Object> params = new ArrayList<Object>(Arrays.asList(stringPacket[3].split(":::")));
+      for (int i=0;i<params.size();i++) {
+        Object param = params.get(i);
+        if (isInt(param.toString())) {
+          params.set(i, Integer.parseInt(param.toString()));
+        }
+        else if (isDouble(param.toString())) {
+          params.set(i, Float.parseFloat(param.toString()));
+        }
+      }
 
       // 処理
       currentPacket = new OscPacket(
@@ -268,4 +276,24 @@ void readNextPacket() {
   catch (Exception e) {
     println(e);
   }
+}
+
+boolean isDouble(String _source) {
+  try {
+    Double.parseDouble(_source);
+    return true;
+  }
+  catch (NumberFormatException e) {
+  }
+  return false;
+}
+
+boolean isInt(String _source) {
+  try {
+    Integer.parseInt(_source);
+    return true;
+  }
+  catch (NumberFormatException e) {
+  }
+  return false;
 }
