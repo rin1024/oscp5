@@ -430,13 +430,7 @@ public class OscP5 implements Observer {
     } catch (IllegalAccessException e) {
       L.error(e.toString());
     } catch (InvocationTargetException e) {
-      L.error(e.toString());
-      L.warn(
-          "OSCメッセージの処理中にエラーが発生しました。コードを確認してください。\n"
-              + "メソッド: "
-              + theMethod.getName()
-              + " エラー: "
-              + e);
+      L.error("error method: " + theMethod.getName() + ", error info: " + e.toString());
     }
   }
 
