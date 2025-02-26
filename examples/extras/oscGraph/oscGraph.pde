@@ -11,12 +11,7 @@ protected final Logger L = Logger.getLogger(getClass());
 
 OscP5 oscP5;
 
-// https://garchiving.com/real-time-graph-by-proccesing/
-float a, b, c;
-int k;
-float w = 2.0;
-
-GraphMonitor testGraph;
+GraphMonitor tGraph;
 
 void settings() {
   System.setProperty("logging.dir", dataPath("../log/"));
@@ -26,37 +21,27 @@ void settings() {
 }
 
 void setup() {
-  //frameRate(100);
-  //smooth();
-  
   String theRemoteAddress = "localhost";
   int theRemotePort = 54445;//10000;
   OscProtocols theProtocol = OscProtocols.UDP;
   //oscP5 = new OscP5( this , theRemoteAddress, theRemotePort, theProtocol );
   oscP5 = new OscP5( this, theRemotePort );
 
-  testGraph = new GraphMonitor("graphTitle", 100, 50, 1000, 400);
+  String TITLE = "graphTitle";
+  int X_OFFSET = 100;
+  int Y_OFFSET = 50;
+  int X_WIDTH = 1000;
+  int Y_HEIGHT = 400;
+  tGraph = new GraphMonitor(this);
+  tGraph.setup(TITLE, X_OFFSET, Y_OFFSET, X_WIDTH, Y_HEIGHT);
 }
 
 void draw() {
   background(250);
-  //testGraph.addGraph(a, b, c);
-  testGraph.graphDraw();
-
-  /*a = sin(radians(k));
-  b = cos(radians(k) * 10);
-  c = sin(radians(k)) * w;
-  k++;*/
+  
+  tGraph.graphDraw(this.g);
+  //tGraph.setOffset(mouseX, mouseY);
 }
-
-/*void keyPressed() {
-  if (keyCode == UP) {
-    w = w + 0.1;
-  }
-  if (keyCode == DOWN) {
-    w = w - 0.1;
-  }
-}*/
 
 void oscEvent( OscMessage _msg ) {
   String address = _msg.getAddress();
@@ -78,7 +63,7 @@ void oscEvent( OscMessage _msg ) {
         {
           float val = _msg.floatValue(i);
           println(val);
-          testGraph.addGraph(val, 0f, 0f);
+          tGraph.addGraph(val);
 
           break;
         }
@@ -94,7 +79,6 @@ void oscEvent( OscMessage _msg ) {
         {
           int val = _msg.intValue(i);
           println(val);
-          //testGraph.addGraph(val, 0f, 0f);
 
           break;
         }
