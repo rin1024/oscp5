@@ -36,18 +36,16 @@ public class GraphMonitor {
   }
 
   public void addGraph(float... _values) {
-    for (int i=0; i<_values.length; i++) {
-      if (i >= params.size()) {
+    maxRange = 1;
+    for (int valueIndex=0; valueIndex<_values.length; valueIndex++) {
+      if (valueIndex >= params.size()) {
         params.add(new float[xWidth]);
       }
-      float[] pValues = params.get(i);
-      pValues[xWidth - 1] = _values[i];
+      float[] pValues = params.get(valueIndex);
+      pValues[xWidth - 1] = _values[valueIndex];
       for (int j = 0; j < xWidth - 1; j++) {
         pValues[j] = pValues[j + 1];
-      }
-      maxRange = 1;
-      for (int j = 0; j < xWidth - 1; j++) {
-        maxRange = (Math.abs(pValues[j]) > maxRange ? Math.abs(pValues[j]) : maxRange);
+        maxRange = (app.abs(pValues[j]) > maxRange ? app.abs(pValues[j]) : maxRange);
       }
     }
   }
