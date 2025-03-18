@@ -1,0 +1,9 @@
+{
+  "myOscPort": 8004,
+  "lastQuery": {
+    "oscAddr": "/inst8",
+    "osrParam": "1",
+    "targetIpAddress": "127.0.0.1",
+    "targetPort": "54445"
+  }
+}

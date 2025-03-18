@@ -2,10 +2,10 @@
   "myOscPort": 8004,
   "prefixAddr": "/sample",
   "lastQuery": {
-    "oscAddr": "/sample_0",
+    "oscAddr": "/sample_4",
     "oscFormat": "ffi",
     "oscParams": "1 1 1",
     "targetIpAddress": "127.0.0.1",
-    "targetPort": "10001"
+    "targetPort": "54445"
   }
 }
