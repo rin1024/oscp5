@@ -62,7 +62,7 @@ void oscEvent( OscMessage _msg ) {
       case 'd':
         {
           float val = _msg.floatValue(i);
-          println(val);
+          println("float or double: " + val);
           tGraph.addGraph(val);
 
           break;
@@ -71,21 +71,21 @@ void oscEvent( OscMessage _msg ) {
       case 'c':
         {
           String val = _msg.stringValue(i);
-          println(val);
+          println("str or char: " + val);
 
           break;
         }
       case 'i':
         {
           int val = _msg.intValue(i);
-          println(val);
+          println("int: " + val);
 
           break;
         }
       case 'b':
         {
           byte[] val = _msg.blobValue(i);
-          println(val);
+          println("byte: " + val);
 
           break;
         }

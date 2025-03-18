@@ -8,9 +8,7 @@ void setup() {
   size( 400 , 400 );
   osc = new OscP5( this , 12000 );
   receiver = new NetAddress( "127.0.0.1" , 12000 );
-
 }
-
 
 void draw() {
   background(0);  
@@ -19,7 +17,6 @@ void draw() {
 void mousePressed() {
   osc.send( receiver , "/test" , 1 , 2.0 , "three" , new byte[] {0x00 , 0x10 , 0x20 }, true , false , 100);
 }
-
 
 void oscEvent( OscMessage m) {
   
@@ -46,4 +43,3 @@ void oscEvent( OscMessage m) {
     
   }
 }
-
