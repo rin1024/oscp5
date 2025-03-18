@@ -1,7 +1,6 @@
+import java.util.ArrayList;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import java.util.ArrayList;
-import java.lang.Math;
 
 public class GraphMonitor {
   private int COLOR_PATTENS[];
@@ -15,29 +14,30 @@ public class GraphMonitor {
 
   public GraphMonitor(PApplet _app) {
     app = _app;
-    
-    COLOR_PATTENS = new int[]{
-      _app.color(255, 0, 0),
-      _app.color(0, 255, 0),
-      _app.color(0, 0, 255),
-      _app.color(255, 255, 0),
-      _app.color(255, 0, 255),
-      _app.color(0, 255, 255),
-    };
+
+    COLOR_PATTENS =
+        new int[] {
+          _app.color(255, 0, 0),
+          _app.color(0, 255, 0),
+          _app.color(0, 0, 255),
+          _app.color(255, 255, 0),
+          _app.color(255, 0, 255),
+          _app.color(0, 255, 255),
+        };
   }
 
   public void setup(String _title, int _xOffset, int _yOffset, int _xWidth, int _yHeight) {
     title = _title;
     xOffset = _xOffset;
     yOffset = _yOffset;
-    xWidth   = _xWidth;
-    yHeight   = _yHeight;
+    xWidth = _xWidth;
+    yHeight = _yHeight;
     params = new ArrayList<float[]>();
   }
 
   public void addGraph(float... _values) {
     maxRange = 1;
-    for (int valueIndex=0; valueIndex<_values.length; valueIndex++) {
+    for (int valueIndex = 0; valueIndex < _values.length; valueIndex++) {
       if (valueIndex >= params.size()) {
         params.add(new float[xWidth]);
       }
@@ -74,16 +74,20 @@ public class GraphMonitor {
     _pg.scale(1, -1);
     _pg.strokeWeight(1);
     for (int i = 0; i < xWidth - 1; i++) {
-      for (int pi=0; pi<params.size(); pi++) {
+      for (int pi = 0; pi < params.size(); pi++) {
         float[] pValues = params.get(pi);
 
         _pg.stroke(COLOR_PATTENS[pi % COLOR_PATTENS.length]);
-        _pg.line(i, pValues[i] * (yHeight / 2) / maxRange, i + 1, pValues[i + 1] * (yHeight / 2) / maxRange);
+        _pg.line(
+            i,
+            pValues[i] * (yHeight / 2) / maxRange,
+            i + 1,
+            pValues[i + 1] * (yHeight / 2) / maxRange);
       }
     }
     _pg.popMatrix();
   }
-  
+
   public void setOffset(int _xOffset, int _yOffset) {
     xOffset = _xOffset;
     yOffset = _yOffset;
