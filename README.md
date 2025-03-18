@@ -1,18 +1,33 @@
-oscp5
-=====
+# oscP5
 
 An Open Sound Control (OSC) implementation for java and processing.org
 
+Original Copyright 2004-2015 Andreas Schlegel
 
+## Sample files
 
+#### Basic
 
-## <a name="issues"></a>Digital Object Identifiers
+- oscP5bundle ... 複数のoscメッセージをまとめて送る
 
-In case you make use of OscP5 in your research publication, please use the DOI below as a reference.
+- oscP5listener ... oscEventのイベントハンドラをp5ファイル以外で行う場合
 
-Digital Object Identifiers (DOI) are the backbone of the academic reference and metrics system which allows researchers writing software to make their work they share on GitHub citable by archiving one of their GitHub repositories and assigning a DOI with the data archiving tool Zenodo [(link)](https://guides.github.com/activities/citable-code/).
+- oscP5parse ... oscのパラメータのパースのサンプル
 
+- oscP5plug ... oscのアドレスごとに異なるイベントハンドラで処理させたい場合
 
-[![DOI](https://zenodo.org/badge/11256/sojamo/oscp5.svg)](http://dx.doi.org/10.5281/zenodo.16308)
+- oscP5receiver ... 受信サンプル
 
-Copyright 2004-2015 Andreas Schlegel
+- oscP5sender ... 送信サンプル
+
+#### Advanced
+
+- oscGraph ... 受信した値をグラフ表示させる
+
+- oscGraphMulti ... 受信した値をグラフ表示させる(複数対応)
+
+- oscMultiSendTester ... 色々なoscアドレスに送信するテスト
+
+- oscMultiSendToggleTester ... 複数の値をトグルで送信させるテスト
+
+- oscP5recorderPlayer ... oscの値をレコードして再生もできる
