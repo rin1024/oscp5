@@ -711,16 +711,6 @@ public class OscP5 implements Observer {
     transmit.send(thePacket.getBytes(), theHost, thePort);
   }
 
-  /**
-   * Sends an OSC packet to a specific host and port.
-   *
-   * @param thePacket The OSC packet to be sent.
-   * @param theHost The target host address.
-   * @param thePort The port number to send the packet to.
-   */
-  public void send(final OscPacket thePacket, final String theHost, final int thePort) {
-    transmit.send(thePacket.getBytes(), theHost, thePort);
-  }
 
   /**
    * Sends an OSC message to a NetAddress using a static method.
