@@ -1,0 +1,5 @@
+{
+  "myOscPort": 8080,
+  "targetIpAddress": "127.0.0.1",
+  "targetPort": 8081
+}
