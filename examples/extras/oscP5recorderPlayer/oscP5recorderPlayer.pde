@@ -36,10 +36,13 @@ NetAddress receiver;
 int STATUS_STOP = -1;
 int STATUS_RECORD = 1;
 int STATUS_PLAY = 2;
+int STATUS_PAUSE = 4;
 int STATUS_END = 3;
 
 int recorderStatus = STATUS_STOP;
 long countTimer = 0;
+long pauseOffset = 0; // pause時の時間オフセット
+String currentPlaybackFile = null; // 現在再生中のファイルパス
 
 long lastReceivedMsgMillis = 0;
 BufferedWriter fos;
@@ -96,6 +99,8 @@ void draw() {
     statusText = "RECORD";
   } else if (recorderStatus == STATUS_PLAY) {
     statusText = "PLAY";
+  } else if (recorderStatus == STATUS_PAUSE) {
+    statusText = "PAUSE";
   } else if (recorderStatus == STATUS_END) {
     statusText = "END";
   }
@@ -109,13 +114,16 @@ void draw() {
     if (currentPacket != null) {
       text("currentPacket: " + currentPacket.toString(), 20, 180);
 
-      // 複数のパケットが同じフレーム内で送信されるべき場合に対応
-      long currentTime = millis() - countTimer;
-      while (currentPacket != null && currentTime >= currentPacket.timeCode) {
-        currentPacket.send(oscP5, receiver);
-        readNextPacket();
-        if (currentPacket != null) {
-          currentTime = millis() - countTimer;
+      // pause中は送信しない
+      if (recorderStatus == STATUS_PLAY) {
+        // 複数のパケットが同じフレーム内で送信されるべき場合に対応
+        long currentTime = millis() - countTimer + pauseOffset;
+        while (currentPacket != null && currentTime >= currentPacket.timeCode) {
+          currentPacket.send(oscP5, receiver);
+          readNextPacket();
+          if (currentPacket != null) {
+            currentTime = millis() - countTimer + pauseOffset;
+          }
         }
       }
     }
@@ -125,7 +133,10 @@ void draw() {
   text("[Shortcut]\r\n" + 
     "[R] ... record start\r\n" + 
     "[P] ... play start\r\n" + 
-    "[S] ... stop\r\n", 20, height - 100);
+    "[Space] ... pause/resume\r\n" + 
+    "[←] ... -500ms\r\n" + 
+    "[→] ... +500ms\r\n" + 
+    "[S] ... stop\r\n", 20, height - 120);
 }
 
 void keyReleased() {
@@ -135,6 +146,12 @@ void keyReleased() {
     recorderStop();
   } else if (keyCode == 'P') {
     playStart();
+  } else if (keyCode == ' ') { // Space key
+    togglePause();
+  } else if (keyCode == LEFT) {
+    seekTime(-500);
+  } else if (keyCode == RIGHT) {
+    seekTime(500);
   }
 }
 
@@ -250,7 +267,7 @@ void recorderStop() {
     catch (Exception e) {
       println(e);
     }
-  } else if (recorderStatus == STATUS_PLAY) {
+  } else if (recorderStatus == STATUS_PLAY || recorderStatus == STATUS_PAUSE) {
     try {
       reader.close();
       reader = null;
@@ -264,7 +281,9 @@ void recorderStop() {
 
   currentIndex = 0;
   countTimer = 0;
+  pauseOffset = 0;
   recorderStatus = STATUS_STOP;
+  currentPlaybackFile = null;
 }
 
 void playStart() {
@@ -294,19 +313,28 @@ void playStart() {
     Charset charset = StandardCharsets.UTF_8;
 
     try {
-      if (reader == null) {
+      if (reader == null || !logFilePath.equals(currentPlaybackFile)) {
         if (Files.exists(path)) {
+          if (reader != null) {
+            reader.close();
+          }
           reader = Files.newBufferedReader(path, charset);
           totalLineCount = Files.lines(path).count();
+          currentPlaybackFile = logFilePath;
           println("Playing from: " + logFilePath);
           readNextPacket();
           
           countTimer = millis();
+          pauseOffset = 0;
           recorderStatus = STATUS_PLAY;
         } else {
           println("Log file not found: " + logFilePath);
           return;
         }
+      } else {
+        // 同じファイルが既に開かれている場合は再開
+        recorderStatus = STATUS_PLAY;
+        countTimer = millis();
       }
     }
     catch (Exception e) {
@@ -391,6 +419,103 @@ boolean isInt(String _source) {
   catch (NumberFormatException e) {
   }
   return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Pause/Resume機能
+////////////////////////////////////////////////////////////////////////////////
+void togglePause() {
+  if (recorderStatus == STATUS_PLAY) {
+    // pause
+    pauseOffset += millis() - countTimer;
+    recorderStatus = STATUS_PAUSE;
+    println("PAUSE at " + pauseOffset + "ms");
+  } else if (recorderStatus == STATUS_PAUSE) {
+    // resume
+    countTimer = millis();
+    recorderStatus = STATUS_PLAY;
+    println("RESUME from " + pauseOffset + "ms");
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// 時間シーク機能
+////////////////////////////////////////////////////////////////////////////////
+void seekTime(long deltaMs) {
+  if (recorderStatus == STATUS_PLAY || recorderStatus == STATUS_PAUSE) {
+    if (currentPlaybackFile == null || reader == null) {
+      return;
+    }
+    
+    long currentTime = (recorderStatus == STATUS_PAUSE) ? pauseOffset : (millis() - countTimer + pauseOffset);
+    long newTime = Math.max(0, currentTime + deltaMs);
+    
+    println("Seeking from " + currentTime + "ms to " + newTime + "ms");
+    
+    try {
+      // ファイルを最初から読み直して、新しい時間位置を見つける
+      reader.close();
+      Path path = Paths.get(currentPlaybackFile);
+      Charset charset = StandardCharsets.UTF_8;
+      reader = Files.newBufferedReader(path, charset);
+      
+      currentIndex = 0;
+      currentPacket = null;
+      OscPacket lastPacket = null;
+      long lastTimeCode = 0;
+      
+      // 指定時間までのパケットを読み込む
+      String line;
+      while ((line = reader.readLine()) != null) {
+        currentIndex++;
+        String[] stringPacket = line.split("\t");
+        long timeCode = Long.parseLong(stringPacket[0]);
+        
+        if (timeCode > newTime) {
+          // このパケットはまだ送信すべきでない
+          currentPacket = lastPacket;
+          break;
+        }
+        
+        // パケットを解析
+        ArrayList<Object> params = new ArrayList<Object>(Arrays.asList(stringPacket[3].split(":::")));
+        String typeTags = stringPacket[2];
+        for (int i=0;i<params.size() && i<typeTags.length();i++) {
+          Object param = params.get(i);
+          char typeTag = typeTags.charAt(i);
+          if (typeTag == 'b') {
+            try {
+              byte[] decodedBytes = Base64.getDecoder().decode(param.toString());
+              params.set(i, decodedBytes);
+            } catch (Exception e) {
+              println("Failed to decode Base64: " + e);
+            }
+          } else if (typeTag == 'i' && isInt(param.toString())) {
+            params.set(i, Integer.parseInt(param.toString()));
+          } else if (typeTag == 'f' && isDouble(param.toString())) {
+            params.set(i, Float.parseFloat(param.toString()));
+          }
+        }
+        
+        lastPacket = new OscPacket(timeCode, stringPacket[1], stringPacket[2], params);
+        lastTimeCode = timeCode;
+      }
+      
+      // 最後まで読み込んだ場合
+      if (currentPacket == null && lastPacket != null) {
+        currentPacket = lastPacket;
+      }
+      
+      // 時間を更新
+      pauseOffset = newTime;
+      countTimer = millis();
+      recorderStatus = STATUS_PLAY;
+      
+      println("Seeked to " + newTime + "ms, packet index: " + currentIndex);
+    } catch (Exception e) {
+      println("Failed to seek: " + e);
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
