@@ -61,7 +61,7 @@ JButton saveConfigButton;
 int bgColor;
 
 void settings() {
-  System.setProperty("logging.dir", dataPath("../log/"));
+  System.setProperty("logging.dir", sketchPath("log"));
   PropertyConfigurator.configure(dataPath("log4j.properties"));
 
   size(800, 500);
