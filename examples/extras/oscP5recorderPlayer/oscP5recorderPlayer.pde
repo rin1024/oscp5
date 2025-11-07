@@ -136,7 +136,7 @@ void draw() {
     "[Space] ... pause/resume\r\n" + 
     "[←] ... -500ms\r\n" + 
     "[→] ... +500ms\r\n" + 
-    "[S] ... stop\r\n", 20, height - 120);
+    "[S] ... stop\r\n", 20, height - 170);
 }
 
 void keyReleased() {
@@ -447,6 +447,9 @@ void seekTime(long deltaMs) {
       return;
     }
     
+    // pause状態を保持
+    boolean wasPaused = (recorderStatus == STATUS_PAUSE);
+    
     long currentTime = (recorderStatus == STATUS_PAUSE) ? pauseOffset : (millis() - countTimer + pauseOffset);
     long newTime = Math.max(0, currentTime + deltaMs);
     
@@ -509,9 +512,15 @@ void seekTime(long deltaMs) {
       // 時間を更新
       pauseOffset = newTime;
       countTimer = millis();
-      recorderStatus = STATUS_PLAY;
       
-      println("Seeked to " + newTime + "ms, packet index: " + currentIndex);
+      // pause状態を保持
+      if (wasPaused) {
+        recorderStatus = STATUS_PAUSE;
+      } else {
+        recorderStatus = STATUS_PLAY;
+      }
+      
+      println("Seeked to " + newTime + "ms, packet index: " + currentIndex + (wasPaused ? " (paused)" : ""));
     } catch (Exception e) {
       println("Failed to seek: " + e);
     }
