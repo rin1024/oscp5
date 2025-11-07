@@ -14,9 +14,11 @@ import org.apache.log4j.PropertyConfigurator;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import processing.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.io.File;
 
 protected final Logger L = Logger.getLogger(getClass());
 String LOG_FILE_PREFIX = "record";
@@ -33,6 +35,7 @@ NetAddress receiver;
 int STATUS_STOP = -1;
 int STATUS_RECORD = 1;
 int STATUS_PLAY = 2;
+int STATUS_END = 3;
 
 int recorderStatus = STATUS_STOP;
 long countTimer = 0;
@@ -87,7 +90,15 @@ void draw() {
   noStroke();
 
   fill(255);
-  text("status: " + (recorderStatus == STATUS_RECORD ? "RECORD" : (recorderStatus == STATUS_PLAY ? "PLAY" : "STOP")), 40, 30);
+  String statusText = "STOP";
+  if (recorderStatus == STATUS_RECORD) {
+    statusText = "RECORD";
+  } else if (recorderStatus == STATUS_PLAY) {
+    statusText = "PLAY";
+  } else if (recorderStatus == STATUS_END) {
+    statusText = "END";
+  }
+  text("status: " + statusText, 40, 30);
   text("countTimer: " + String.format("%06d", countTimer > 0 ? (millis() - countTimer) : 0), 200, 30);
 
   // play
@@ -252,29 +263,51 @@ void recorderStop() {
 void playStart() {
   println("PLAY START");
 
-  String logFilePath = getLogFilePath();
-  Path path = Paths.get(logFilePath);
-  Charset charset = StandardCharsets.UTF_8;
+  // ファイル選択ダイアログを表示
+  JFileChooser fileChooser = new JFileChooser();
+  fileChooser.setDialogTitle("Select Record File to Play");
+  
+  // recordsフォルダをデフォルトの場所に設定
+  String recordsDir = sketchPath("records");
+  File recordsFolder = new File(recordsDir);
+  if (recordsFolder.exists()) {
+    fileChooser.setCurrentDirectory(recordsFolder);
+  }
+  
+  // .txtファイルのみ選択可能にする
+  FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files (*.txt)", "txt");
+  fileChooser.setFileFilter(filter);
+  
+  int result = fileChooser.showOpenDialog(null);
+  
+  if (result == JFileChooser.APPROVE_OPTION) {
+    File selectedFile = fileChooser.getSelectedFile();
+    String logFilePath = selectedFile.getAbsolutePath();
+    Path path = Paths.get(logFilePath);
+    Charset charset = StandardCharsets.UTF_8;
 
-  try {
-    if (reader == null) {
-      if (Files.exists(path)) {
-        reader = Files.newBufferedReader(path, charset);
-        totalLineCount = Files.lines(path).count();
-        println("Playing from: " + logFilePath);
-        readNextPacket();
-      } else {
-        println("Log file not found: " + logFilePath);
-        return;
+    try {
+      if (reader == null) {
+        if (Files.exists(path)) {
+          reader = Files.newBufferedReader(path, charset);
+          totalLineCount = Files.lines(path).count();
+          println("Playing from: " + logFilePath);
+          readNextPacket();
+          
+          countTimer = millis();
+          recorderStatus = STATUS_PLAY;
+        } else {
+          println("Log file not found: " + logFilePath);
+          return;
+        }
       }
     }
+    catch (Exception e) {
+      println("Failed to open file: " + e);
+    }
+  } else {
+    println("File selection cancelled");
   }
-  catch (Exception e) {
-    println(e);
-  }
-
-  countTimer = millis();
-  recorderStatus = STATUS_PLAY;
 }
 
 void readNextPacket() {
@@ -324,6 +357,7 @@ void readNextPacket() {
       currentPacket = null;
       currentIndex = 0;
       countTimer = 0;
+      recorderStatus = STATUS_END;
     }
   }
   catch (Exception e) {
