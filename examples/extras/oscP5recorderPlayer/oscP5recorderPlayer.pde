@@ -10,7 +10,6 @@ import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.util.Base64;
 import java.util.Arrays;
-import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 protected final Logger L = Logger.getLogger(getClass());
@@ -152,7 +151,8 @@ void oscEvent( OscMessage _msg ) {
         {
           byte[] val = _msg.blobValue(i);
           params.add(val);
-          newLine += val + ":::";
+          String base64Val = Base64.getEncoder().encodeToString(val);
+          newLine += base64Val + ":::";
           break;
         }
       default:
@@ -243,14 +243,24 @@ void readNextPacket() {
       println("[" + currentIndex + "]" + line);
       String[] stringPacket = line.split("\t");
       ArrayList<Object> params = new ArrayList<Object>(Arrays.asList(stringPacket[3].split(":::")));
-      for (int i=0;i<params.size();i++) {
+      String typeTags = stringPacket[2];
+      for (int i=0;i<params.size() && i<typeTags.length();i++) {
         Object param = params.get(i);
-        if (isInt(param.toString())) {
+        char typeTag = typeTags.charAt(i);
+        if (typeTag == 'b') {
+          // Base64デコードしてbyte[]に戻す
+          try {
+            byte[] decodedBytes = Base64.getDecoder().decode(param.toString());
+            params.set(i, decodedBytes);
+          } catch (Exception e) {
+            println("Failed to decode Base64: " + e);
+          }
+        } else if (typeTag == 'i' && isInt(param.toString())) {
           params.set(i, Integer.parseInt(param.toString()));
-        }
-        else if (isDouble(param.toString())) {
+        } else if (typeTag == 'f' && isDouble(param.toString())) {
           params.set(i, Float.parseFloat(param.toString()));
         }
+        // 's'と'c'の場合は文字列のまま
       }
 
       // 処理
