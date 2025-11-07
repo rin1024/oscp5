@@ -34,6 +34,7 @@ OscP5 oscP5;
 NetAddress receiver;
 
 int STATUS_STOP = -1;
+int STATUS_RECORD_READY = 0;
 int STATUS_RECORD = 1;
 int STATUS_PLAY = 2;
 int STATUS_PAUSE = 4;
@@ -95,7 +96,9 @@ void draw() {
 
   fill(255);
   String statusText = "STOP";
-  if (recorderStatus == STATUS_RECORD) {
+  if (recorderStatus == STATUS_RECORD_READY) {
+    statusText = "RECORD_READY";
+  } else if (recorderStatus == STATUS_RECORD) {
     statusText = "RECORD";
   } else if (recorderStatus == STATUS_PLAY) {
     statusText = "PLAY";
@@ -105,7 +108,7 @@ void draw() {
     statusText = "END";
   }
   text("status: " + statusText, 40, 30);
-  text("countTimer: " + String.format("%06d", countTimer > 0 ? (millis() - countTimer) : 0), 200, 30);
+  text("countTimer: " + String.format("%06d", countTimer > 0 ? (millis() - countTimer) : 0), 300, 30);
 
   // play
   {
@@ -140,7 +143,7 @@ void draw() {
 }
 
 void keyReleased() {
-  if (keyCode == 'R' && recorderStatus != STATUS_RECORD) {
+  if (keyCode == 'R' && recorderStatus != STATUS_RECORD && recorderStatus != STATUS_RECORD_READY) {
     recordStart();
   } else if (keyCode == 'S') {
     recorderStop();
@@ -161,6 +164,14 @@ void oscEvent( OscMessage _msg ) {
   ArrayList<Object> params = new ArrayList<Object>();
 
   lastReceivedMsgMillis = millis();
+
+  // RECORD_READY状態の場合、最初のメッセージ受信時にcountTimerを開始
+  if (recorderStatus == STATUS_RECORD_READY) {
+    countTimer = millis();
+    recorderStatus = STATUS_RECORD;
+    currentIndex = 0; // レコーディング時のカウンタをリセット
+    println("First OSC message received, recording started");
+  }
 
   try {
     long timeCode = millis() - countTimer;
@@ -239,7 +250,7 @@ String getLogFilePath() {
 }
 
 void recordStart() {
-  println("RECORD START");
+  println("RECORD READY - Waiting for first OSC message...");
 
   try {
     String logFilePath = getLogFilePath();
@@ -251,18 +262,21 @@ void recordStart() {
     println(e);
   }
 
-  countTimer = millis();
-  recorderStatus = STATUS_RECORD;
+  // countTimerは最初のOSCメッセージ受信時に開始
+  countTimer = 0;
+  recorderStatus = STATUS_RECORD_READY;
   currentIndex = 0; // レコーディング時のカウンタをリセット
 }
 
 void recorderStop() {
   println("STOP");
 
-  if (recorderStatus == STATUS_RECORD) {
+  if (recorderStatus == STATUS_RECORD || recorderStatus == STATUS_RECORD_READY) {
     try {
-      fos.flush();
-      fos.close();
+      if (fos != null) {
+        fos.flush();
+        fos.close();
+      }
     }
     catch (Exception e) {
       println(e);
