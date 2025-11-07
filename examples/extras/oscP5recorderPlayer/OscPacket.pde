@@ -18,7 +18,7 @@ public class OscPacket {
     }
     _osc.send(_receiver, msg);
     
-    println(msg);
+    //println(msg);
   }
   
   public String toString() {

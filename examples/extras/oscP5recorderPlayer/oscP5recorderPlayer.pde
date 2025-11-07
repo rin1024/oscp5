@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.io.BufferedReader;
 import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.util.Base64;
 import java.util.Arrays;
 import org.apache.log4j.PropertyConfigurator;
@@ -41,7 +42,7 @@ int recorderStatus = STATUS_STOP;
 long countTimer = 0;
 
 long lastReceivedMsgMillis = 0;
-FileWriter fos;
+BufferedWriter fos;
 BufferedReader reader = null;
 
 OscPacket currentPacket = null;
@@ -108,11 +109,14 @@ void draw() {
     if (currentPacket != null) {
       text("currentPacket: " + currentPacket.toString(), 20, 180);
 
-      if (millis() - countTimer > currentPacket.timeCode) {
+      // 複数のパケットが同じフレーム内で送信されるべき場合に対応
+      long currentTime = millis() - countTimer;
+      while (currentPacket != null && currentTime >= currentPacket.timeCode) {
         currentPacket.send(oscP5, receiver);
-        println("bang");
-        
         readNextPacket();
+        if (currentPacket != null) {
+          currentTime = millis() - countTimer;
+        }
       }
     }
   }
@@ -138,11 +142,6 @@ void oscEvent( OscMessage _msg ) {
   String address = _msg.getAddress();
   String typeTags = _msg.getTypetag();
   ArrayList<Object> params = new ArrayList<Object>();
-
-  print( "Received an osc message" );
-  print( ", address pattern: " + address );
-  print( ", typeTags: " + typeTags );
-  println();
 
   lastReceivedMsgMillis = millis();
 
@@ -185,16 +184,22 @@ void oscEvent( OscMessage _msg ) {
         }
       default:
         {
-          println("unknown typetag: " + typeTag);
+          // unknown typetag - ログ出力を削除してパフォーマンス向上
           break;
         }
       }
     }
 
-    fos.write(newLine + "\r\n");
+    fos.write(newLine);
+    fos.newLine();
+    currentIndex++; // レコーディング時のカウンタをインクリメント
+    // リアルタイム性を保つため、定期的にflush（毎回は遅延の原因になるため、一定間隔で）
+    if (currentIndex % 10 == 0) {
+      fos.flush();
+    }
   }
   catch (Exception e) {
-    println(e);
+    println("Error in oscEvent: " + e);
   }
 }
 
@@ -221,7 +226,8 @@ void recordStart() {
 
   try {
     String logFilePath = getLogFilePath();
-    fos = new FileWriter(logFilePath);
+    FileWriter fw = new FileWriter(logFilePath);
+    fos = new BufferedWriter(fw, 8192); // 8KBバッファでパフォーマンス向上
     println("Recording to: " + logFilePath);
   }
   catch (Exception e) {
@@ -230,6 +236,7 @@ void recordStart() {
 
   countTimer = millis();
   recorderStatus = STATUS_RECORD;
+  currentIndex = 0; // レコーディング時のカウンタをリセット
 }
 
 void recorderStop() {
@@ -316,7 +323,8 @@ void readNextPacket() {
     if (line != null) {
       currentIndex++;
 
-      println("[" + currentIndex + "]" + line);
+      // デバッグ出力を削除してパフォーマンス向上（必要に応じてコメントアウト）
+      // println("[" + currentIndex + "]" + line);
       String[] stringPacket = line.split("\t");
       ArrayList<Object> params = new ArrayList<Object>(Arrays.asList(stringPacket[3].split(":::")));
       String typeTags = stringPacket[2];
