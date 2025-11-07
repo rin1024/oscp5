@@ -83,7 +83,7 @@ gradle.projectsEvaluated {
 
 // ------------------------------------------------------------
 // Version.javaを入れるディレクトリ
-def VERSION_JAVA_FOLDER = 'src/main/java/jp/ncl/app/lighting/player/shader'
+def VERSION_JAVA_FOLDER = 'src/main/java/oscP5'
 
 // gradleでjar生成するバージョンと、javaのクラスファイルに定義するバージョンを一律にするtask
 // https://www.gwtcenter.com/handling-version-number-uniformly-by-gradle
